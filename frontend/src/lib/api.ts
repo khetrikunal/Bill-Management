@@ -20,6 +20,10 @@ async function request(method: string, path: string, body?: unknown, isForm = fa
   const headers: Record<string, string> = {}
   const t = getToken()
   if (t) headers.Authorization = `Bearer ${t}`
+  const requestedCompany = new URLSearchParams(path.split('?')[1] || '').get('companyId')
+  headers['X-Company-Id'] = requestedCompany && /^\d+$/.test(requestedCompany)
+    ? requestedCompany
+    : localStorage.getItem('bm_company_id') || '1'
   if (body !== undefined && !isForm) headers['Content-Type'] = 'application/json'
   let res: Response
   try {

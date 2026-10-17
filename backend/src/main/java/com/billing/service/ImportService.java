@@ -35,7 +35,12 @@ public class ImportService {
 
     @Transactional
     public ImportResult run(InputStream in, String mode, String sheetName, boolean commit) {
-        CompanySettings s = settings.findById(1L).orElseThrow();
+        return run(1L, in, mode, sheetName, commit);
+    }
+
+    @Transactional
+    public ImportResult run(Long companyId, InputStream in, String mode, String sheetName, boolean commit) {
+        CompanySettings s = settings.findById(companyId).orElseThrow();
         List<ImportRow> parsed;
         try (Workbook wb = new XSSFWorkbook(in)) {
             Sheet sheet = sheetName != null && !sheetName.isBlank() ? wb.getSheet(sheetName) : wb.getSheetAt(0);
@@ -54,8 +59,9 @@ public class ImportService {
             if (status.equals("NEW")) {
                 String key = (r.itemCode() != null && !r.itemCode().isBlank() ? r.itemCode() : r.name() + "|" + r.hsn()).toLowerCase();
                 boolean exists = r.itemCode() != null && !r.itemCode().isBlank()
-                        ? !products.findByItemCodeIgnoreCase(r.itemCode()).isEmpty()
-                        : !products.findByNameIgnoreCaseAndHsn(r.name(), r.hsn() == null ? "" : r.hsn()).isEmpty();
+                        ? !products.findByCompanyIdAndItemCodeIgnoreCase(companyId, r.itemCode()).isEmpty()
+                        : !products.findByCompanyIdAndNameIgnoreCaseAndHsn(companyId, r.name(),
+                                r.hsn() == null ? "" : r.hsn()).isEmpty();
                 if (exists || !seen.add(key)) {
                     status = "DUPLICATE";
                     msg = "Already exists / repeated in file - skipped";
@@ -68,6 +74,7 @@ public class ImportService {
             }
             if (commit && status.equals("NEW")) {
                 Product p = new Product();
+                p.companyId = companyId;
                 p.name = r.name();
                 p.itemCode = r.itemCode() == null ? "" : r.itemCode();
                 p.hsn = r.hsn() == null ? "" : r.hsn();

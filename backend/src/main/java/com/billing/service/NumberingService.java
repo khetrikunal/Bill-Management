@@ -11,7 +11,7 @@ import java.time.LocalDate;
 /**
  * Final invoice numbers are allocated only at finalization, inside the finalize transaction, using a row lock
  * on the sequence row (SELECT ... FOR UPDATE). Concurrent finalizations queue on that lock, so numbers are
- * unique and gap-free. A UNIQUE constraint on bill.invoice_number is a second safety net.
+ * unique and gap-free. A company/invoice unique index is a second safety net.
  * Drafts have no invoice number. A rolled-back finalization also rolls back its sequence increment.
  */
 @Service
@@ -23,7 +23,7 @@ public class NumberingService {
     @Transactional(propagation = Propagation.MANDATORY)
     public String next(CompanySettings s, LocalDate invoiceDate) {
         String fy = financialYear(invoiceDate);
-        String key = s.invoicePrefix + "|" + (s.includeFinancialYear ? fy : "-");
+        String key = s.id + "|" + s.invoicePrefix + "|" + (s.includeFinancialYear ? fy : "-");
         repo.insertIfAbsent(key);
         NumberSequence seq = repo.lockByKey(key).orElseThrow();
         seq.lastValue += 1;

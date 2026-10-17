@@ -52,7 +52,7 @@ public class SecurityConfig {
                 .filter(s -> !s.isEmpty()).toList();
         c.setAllowedOrigins(origins);
         c.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        c.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        c.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Company-Id"));
         c.setExposedHeaders(List.of("Content-Disposition"));
         UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
         src.registerCorsConfiguration("/api/**", c);

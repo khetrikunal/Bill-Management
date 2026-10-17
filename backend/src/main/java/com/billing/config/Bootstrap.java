@@ -3,6 +3,7 @@ package com.billing.config;
 import com.billing.domain.AppUser;
 import com.billing.domain.Role;
 import com.billing.repo.UserRepository;
+import com.billing.service.CompanyAccessService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -16,11 +17,13 @@ public class Bootstrap implements CommandLineRunner {
     private final UserRepository users;
     private final PasswordEncoder encoder;
     private final AppProps props;
+    private final CompanyAccessService companyAccess;
 
-    public Bootstrap(UserRepository users, PasswordEncoder encoder, AppProps props) {
+    public Bootstrap(UserRepository users, PasswordEncoder encoder, AppProps props, CompanyAccessService companyAccess) {
         this.users = users;
         this.encoder = encoder;
         this.props = props;
+        this.companyAccess = companyAccess;
     }
 
     @Override
@@ -38,7 +41,8 @@ public class Bootstrap implements CommandLineRunner {
         u.passwordHash = encoder.encode(pw);
         u.fullName = "Administrator";
         u.role = Role.ADMIN;
-        users.save(u);
+        u = users.save(u);
+        companyAccess.grantAll(u.id);
         log.info("Created initial admin user '{}'. Change the password after first login.", u.username);
     }
 }

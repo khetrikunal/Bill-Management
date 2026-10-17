@@ -2,14 +2,21 @@ import { useEffect, useState } from 'react'
 import { Alert, Field, PageHeader, Spinner } from '../components/ui'
 import { api, ApiError } from '../lib/api'
 import type { Role, User } from '../lib/types'
+import { useCompany } from '../lib/company'
 
 export default function Users() {
+  const { companies } = useCompany()
   const [list, setList] = useState<User[] | null>(null)
+  const [accessByUser, setAccessByUser] = useState<Record<number, number[]>>({})
   const [err, setErr] = useState('')
   const [fe, setFe] = useState<Record<string, string>>({})
   const [nu, setNu] = useState({ username: '', fullName: '', role: 'BILLING' as Role, password: '' })
   const [show, setShow] = useState(false)
-  const load = () => api.get<User[]>('/users').then(setList).catch(e => setErr(e.message))
+  const load = () => api.get<User[]>('/users').then(async users => {
+    setList(users)
+    const grants = await Promise.all(users.map(async user => [user.id, await api.get<number[]>(`/users/${user.id}/companies`)] as const))
+    setAccessByUser(Object.fromEntries(grants))
+  }).catch(e => setErr(e.message))
   useEffect(() => { load() }, [])
 
   async function create() {
@@ -20,6 +27,15 @@ export default function Users() {
   async function patch(u: User, body: object) {
     setErr('')
     try { await api.put(`/users/${u.id}`, body); load() } catch (e) { setErr((e as Error).message) }
+  }
+  async function toggleCompany(user: User, id: number) {
+    const current = accessByUser[user.id] || []
+    const next = current.includes(id) ? current.filter(companyId => companyId !== id) : [...current, id]
+    setErr('')
+    try {
+      const saved = await api.put<number[]>(`/users/${user.id}/companies`, { companyIds: next })
+      setAccessByUser({ ...accessByUser, [user.id]: saved })
+    } catch (e) { setErr((e as Error).message) }
   }
 
   return (
@@ -44,6 +60,16 @@ export default function Users() {
                 <select className="input !w-auto !py-2" value={u.role} onChange={e => patch(u, { role: e.target.value })}><option value="ADMIN">Admin</option><option value="BILLING">Billing staff</option><option value="VIEWER">Viewer</option></select>
                 <button className="btn" onClick={() => { const p = prompt('New password (min 8 characters):'); if (p) patch(u, { password: p }) }}>Reset password</button>
                 <button className="btn" onClick={() => patch(u, { active: !u.active })}>{u.active ? 'Deactivate' : 'Activate'}</button>
+              </div>
+              <div className="flex w-full flex-wrap gap-3 text-sm">
+                <span className="font-semibold">Company access:</span>
+                {companies.map(company => (
+                  <label key={company.id} className="flex items-center gap-1">
+                    <input type="checkbox" checked={(accessByUser[u.id] || []).includes(company.id)}
+                      onChange={() => toggleCompany(u, company.id)} />
+                    {company.displayName}
+                  </label>
+                ))}
               </div>
             </div>
           ))}

@@ -25,21 +25,30 @@ public final class Dtos {
                              @NotBlank @Size(min = 8, max = 100) String password) { }
     public record UserUpdate(@Size(max = 120) String fullName, Role role, Boolean active,
                              @Size(min = 8, max = 100) String password) { }
+    public record CompanyAccessRequest(@NotNull List<@NotNull Long> companyIds) { }
     public record PasswordChange(@NotBlank String currentPassword, @NotBlank @Size(min = 8, max = 100) String newPassword) { }
 
     // ---------- settings ----------
     public record SettingsDto(
+            Long id,
             @NotBlank @Size(max = 200) String companyName,
+            @Size(max = 200) String displayName,
             @Size(max = 1000) String address,
+            @Size(max = 1000) String billingAddress,
             @Size(max = 200) String phone,
             @Size(max = 200) String email,
             @Pattern(regexp = GSTIN_RE) String gstin,
+            @Pattern(regexp = "^$|^[A-Z]{5}[0-9]{4}[A-Z]$") String pan,
             @Size(max = 120) String bankName,
             @Size(max = 60) String bankAccount,
             @Size(max = 120) String bankBranch,
             @Size(max = 20) String ifsc,
+            @Size(max = 120) String upiId,
+            @Size(max = 500) String defaultPaymentTerms,
             @Size(max = 1000) String declaration,
             @Size(max = 300) String signatureText,
+            @Size(max = 200) String authorizedSignatory,
+            @Size(max = 120) String signatoryDesignation,
             @Size(max = 1000) String footerNote,
             @Size(max = 600000) String logo,
             @NotBlank @Pattern(regexp = "[A-Z]{3}") String defaultCurrency,
@@ -50,24 +59,30 @@ public final class Dtos {
             @Min(1) @Max(8) int numberPadding,
             boolean includeFinancialYear) {
         public static SettingsDto of(CompanySettings s) {
-            return new SettingsDto(s.companyName, s.address, s.phone, s.email, s.gstin, s.bankName, s.bankAccount,
-                    s.bankBranch, s.ifsc, s.declaration, s.signatureText, s.footerNote, s.logo, s.defaultCurrency,
-                    s.defaultCgstRate, s.defaultSgstRate, s.pageSize, s.invoicePrefix, s.numberPadding,
-                    s.includeFinancialYear);
+            return new SettingsDto(s.id, s.companyName, s.displayName, s.address, s.billingAddress, s.phone, s.email,
+                    s.gstin, s.pan, s.bankName, s.bankAccount, s.bankBranch, s.ifsc, s.upiId,
+                    s.defaultPaymentTerms, s.declaration, s.signatureText, s.authorizedSignatory,
+                    s.signatoryDesignation, s.footerNote, s.logo, s.defaultCurrency, s.defaultCgstRate,
+                    s.defaultSgstRate, s.pageSize, s.invoicePrefix, s.numberPadding, s.includeFinancialYear);
         }
     }
 
     /** Seller details frozen into a bill at finalization so later settings changes never alter old invoices. */
-    public record SellerSnapshot(String companyName, String address, String phone, String email, String gstin,
+    public record SellerSnapshot(String companyName, String displayName, String address, String billingAddress,
+                                 String phone, String email, String gstin, String pan,
                                  String bankName, String bankAccount, String bankBranch, String ifsc,
-                                 String declaration, String signatureText, String footerNote, String logo,
-                                 String pageSize) {
+                                 String upiId, String defaultPaymentTerms, String declaration, String signatureText,
+                                 String authorizedSignatory, String signatoryDesignation, String footerNote,
+                                 String logo, String pageSize) {
         public static SellerSnapshot of(CompanySettings s) {
-            return new SellerSnapshot(s.companyName, s.address, s.phone, s.email, s.gstin, s.bankName,
-                    s.bankAccount, s.bankBranch, s.ifsc, s.declaration, s.signatureText, s.footerNote, s.logo,
-                    s.pageSize);
+            return new SellerSnapshot(s.companyName, s.displayName, s.address, s.billingAddress, s.phone, s.email,
+                    s.gstin, s.pan, s.bankName, s.bankAccount, s.bankBranch, s.ifsc, s.upiId,
+                    s.defaultPaymentTerms, s.declaration, s.signatureText, s.authorizedSignatory,
+                    s.signatoryDesignation, s.footerNote, s.logo, s.pageSize);
         }
     }
+
+    public record CompanyOption(Long id, String displayName) { }
 
     // ---------- master data ----------
     public record CustomerDto(Long id, @NotBlank @Size(max = 200) String name, @Size(max = 1000) String address,
@@ -113,22 +128,48 @@ public final class Dtos {
                               @NotBlank @Pattern(regexp = "[A-Z]{3}") String currency,
                               @Size(max = 2000) String notes,
                               Long version,
-                              @NotEmpty @Size(max = 200) List<@Valid ItemDto> items) { }
+                              @NotEmpty @Size(max = 200) List<@Valid ItemDto> items,
+                              LocalDate dueDate,
+                              @Size(max = 500) String paymentTerms,
+                              @Size(max = 60) String buyerPhone,
+                              @Email @Size(max = 200) String buyerEmail,
+                              @Size(max = 1000) String shippingAddress) {
+        public BillRequest(DocType docType, LocalDate invoiceDate, String transactionRef, String poNumber,
+                           Long buyerId, String buyerName, String buyerAddress, String buyerGstin, String currency,
+                           String notes, Long version, List<ItemDto> items) {
+            this(docType, invoiceDate, transactionRef, poNumber, buyerId, buyerName, buyerAddress, buyerGstin,
+                    currency, notes, version, items, null, "", "", "", "");
+        }
+    }
 
     public record CancelRequest(@NotBlank @Size(min = 3, max = 500) String reason) { }
 
-    public record BillDto(Long id, DocType docType, String docTypeLabel, BillStatus status, String invoiceNumber,
-                          String displayNumber, LocalDate invoiceDate, String transactionRef, String poNumber,
-                          Long buyerId, String buyerName, String buyerAddress, String buyerGstin, String currency,
+    public record BillDto(Long id, Long companyId, String companyDisplayName, DocType docType, String docTypeLabel,
+                          BillStatus status, String invoiceNumber,
+                          String displayNumber, LocalDate invoiceDate, LocalDate dueDate, String paymentTerms,
+                          String transactionRef, String poNumber, Long buyerId, String buyerName, String buyerAddress,
+                          String buyerGstin, String buyerPhone, String buyerEmail, String shippingAddress, String currency,
                           String notes, SellerSnapshot seller, List<ItemDto> items, BigDecimal totalTaxable,
                           BigDecimal totalCgst, BigDecimal totalSgst, BigDecimal totalTax, BigDecimal grandTotal,
                           String amountInWords, String createdBy, Instant createdAt, Instant updatedAt,
                           Instant finalizedAt, Instant cancelledAt, String cancelReason, Long duplicatedFrom,
-                          Long version) { }
+                          Long version, BigDecimal amountPaid, BigDecimal outstandingBalance, String paymentStatus,
+                          List<PaymentDto> payments) { }
 
-    public record BillSummary(Long id, DocType docType, String docTypeLabel, BillStatus status, String invoiceNumber,
-                              String displayNumber, String buyerName, LocalDate invoiceDate, String currency,
-                              BigDecimal grandTotal, Instant createdAt) { }
+    public record BillSummary(Long id, Long companyId, String companyDisplayName, DocType docType, String docTypeLabel,
+                              BillStatus status, String invoiceNumber,
+                              String displayNumber, String buyerName, LocalDate invoiceDate, LocalDate dueDate, String currency,
+                              BigDecimal grandTotal, BigDecimal amountPaid, BigDecimal outstandingBalance,
+                              String paymentStatus, Instant createdAt) { }
+
+    public record PaymentRequest(@NotNull @DecimalMin(value = "0", inclusive = false)
+                                 @Digits(integer = 14, fraction = 2) BigDecimal amount,
+                                 @NotNull LocalDate paymentDate,
+                                 @NotBlank @Pattern(regexp = "CASH|BANK_TRANSFER|UPI|CHEQUE|OTHER") String method,
+                                 @Size(max = 120) String transactionReference,
+                                 @Size(max = 1000) String notes) { }
+    public record PaymentDto(Long id, BigDecimal amount, LocalDate paymentDate, String method,
+                             String transactionReference, String notes, String recordedBy, Instant createdAt) { }
 
     public record AuditDto(String action, String username, String detail, Instant createdAt) { }
 
@@ -137,6 +178,11 @@ public final class Dtos {
     public record DocTypeDto(String code, String label, String description) { }
 
     public record Dashboard(long total, long thisMonth, long drafts, long finalized, long cancelled,
-                            List<BillSummary> recent, List<CurrencyTotal> finalizedThisMonth) { }
+                            List<BillSummary> recent, List<CurrencyTotal> finalizedThisMonth,
+                            List<CompanyDashboard> companies, long overdue) { }
     public record CurrencyTotal(String currency, BigDecimal total) { }
+    public record CompanyDashboard(Long companyId, String companyDisplayName, long invoiceCount,
+                                   List<CurrencyLedger> totals) { }
+    public record CurrencyLedger(String currency, BigDecimal billed, BigDecimal received,
+                                 BigDecimal outstanding) { }
 }

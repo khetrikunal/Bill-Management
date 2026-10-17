@@ -13,14 +13,20 @@ public class Bill {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) public Long id;
     @Enumerated(EnumType.STRING) public DocType docType;
     @Enumerated(EnumType.STRING) public BillStatus status = BillStatus.DRAFT;
+    @Column(name = "company_id", nullable = false) public Long companyId = 1L;
     public String invoiceNumber;
     public LocalDate invoiceDate;
+    public LocalDate dueDate;
+    public String paymentTerms;
     public String transactionRef;
     public String poNumber;
     public Long buyerId;
     public String buyerName;
     public String buyerAddress;
     public String buyerGstin;
+    public String buyerPhone;
+    public String buyerEmail;
+    public String shippingAddress;
     public String currency;
     public String sellerSnapshot;
     public String notes;
@@ -42,4 +48,8 @@ public class Bill {
     @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("lineNo ASC")
     public List<BillItem> items = new ArrayList<>();
+
+    @OneToMany(mappedBy = "bill")
+    @OrderBy("paymentDate ASC, id ASC")
+    public List<BillPayment> payments = new ArrayList<>();
 }

@@ -5,6 +5,7 @@ import com.billing.domain.Role;
 import com.billing.dto.Dtos.*;
 import com.billing.repo.UserRepository;
 import com.billing.service.ApiException;
+import com.billing.service.CompanyAccessService;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -19,16 +20,19 @@ import java.util.List;
 public class UserController {
     private final UserRepository users;
     private final PasswordEncoder encoder;
+    private final CompanyAccessService companyAccess;
 
-    public UserController(UserRepository users, PasswordEncoder encoder) {
+    public UserController(UserRepository users, PasswordEncoder encoder, CompanyAccessService companyAccess) {
         this.users = users;
         this.encoder = encoder;
+        this.companyAccess = companyAccess;
     }
 
     @GetMapping
     public List<UserDto> list() { return users.findAll().stream().map(UserDto::of).toList(); }
 
     @PostMapping
+    @Transactional
     public UserDto create(@Valid @RequestBody UserCreate r) {
         if (users.existsByUsernameIgnoreCase(r.username())) throw ApiException.conflict("Username already exists");
         AppUser u = new AppUser();
@@ -36,7 +40,23 @@ public class UserController {
         u.fullName = r.fullName().trim();
         u.role = r.role();
         u.passwordHash = encoder.encode(r.password());
-        return UserDto.of(users.save(u));
+        u = users.save(u);
+        companyAccess.grantAll(u.id);
+        return UserDto.of(u);
+    }
+
+    @GetMapping("/{id}/companies")
+    public List<Long> companies(@PathVariable Long id) {
+        if (!users.existsById(id)) throw ApiException.notFound("User not found");
+        return companyAccess.companyIds(id);
+    }
+
+    @PutMapping("/{id}/companies")
+    @Transactional
+    public List<Long> setCompanies(@PathVariable Long id, @Valid @RequestBody CompanyAccessRequest request) {
+        if (!users.existsById(id)) throw ApiException.notFound("User not found");
+        companyAccess.replace(id, request.companyIds());
+        return companyAccess.companyIds(id);
     }
 
     @PutMapping("/{id}")

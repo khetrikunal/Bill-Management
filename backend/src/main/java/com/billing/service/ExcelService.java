@@ -21,32 +21,38 @@ public class ExcelService {
             money.setDataFormat(wb.createDataFormat().getFormat("#,##0.00"));
 
             Sheet s = wb.createSheet("Bills");
-            String[] h = {"Invoice No", "Status", "Document Type", "Invoice Date", "Buyer", "Buyer GSTIN", "P.O. No",
-                    "Ref", "Currency", "Taxable Value", "CGST", "SGST", "Tax Amount", "Total with Tax", "Created At"};
+            String[] h = {"Invoice No", "Company", "Status", "Payment Status", "Document Type", "Invoice Date",
+                    "Due Date", "Buyer", "Buyer GSTIN", "P.O. No", "Ref", "Currency", "Taxable Value", "CGST",
+                    "SGST", "Tax Amount", "Total with Tax", "Received", "Outstanding", "Created At"};
             row(s, 0, head, (Object[]) h);
             int r = 1;
             for (BillDto b : bills) {
                 Row row = s.createRow(r++);
                 put(row, 0, b.displayNumber(), null);
-                put(row, 1, b.status().name(), null);
-                put(row, 2, b.docTypeLabel(), null);
-                put(row, 3, b.invoiceDate().toString(), null);
-                put(row, 4, b.buyerName(), null);
-                put(row, 5, b.buyerGstin(), null);
-                put(row, 6, b.poNumber(), null);
-                put(row, 7, b.transactionRef(), null);
-                put(row, 8, b.currency(), null);
-                put(row, 9, b.totalTaxable().doubleValue(), money);
-                put(row, 10, b.totalCgst().doubleValue(), money);
-                put(row, 11, b.totalSgst().doubleValue(), money);
-                put(row, 12, b.totalTax().doubleValue(), money);
-                put(row, 13, b.grandTotal().doubleValue(), money);
-                put(row, 14, b.createdAt().toString(), null);
+                put(row, 1, b.companyDisplayName(), null);
+                put(row, 2, b.status().name(), null);
+                put(row, 3, b.paymentStatus(), null);
+                put(row, 4, b.docTypeLabel(), null);
+                put(row, 5, b.invoiceDate().toString(), null);
+                put(row, 6, b.dueDate() == null ? "" : b.dueDate().toString(), null);
+                put(row, 7, b.buyerName(), null);
+                put(row, 8, b.buyerGstin(), null);
+                put(row, 9, b.poNumber(), null);
+                put(row, 10, b.transactionRef(), null);
+                put(row, 11, b.currency(), null);
+                put(row, 12, b.totalTaxable().doubleValue(), money);
+                put(row, 13, b.totalCgst().doubleValue(), money);
+                put(row, 14, b.totalSgst().doubleValue(), money);
+                put(row, 15, b.totalTax().doubleValue(), money);
+                put(row, 16, b.grandTotal().doubleValue(), money);
+                put(row, 17, b.amountPaid().doubleValue(), money);
+                put(row, 18, b.outstandingBalance().doubleValue(), money);
+                put(row, 19, b.createdAt().toString(), null);
             }
             for (int c = 0; c < h.length; c++) s.setColumnWidth(c, 18 * 256);
 
             Sheet li = wb.createSheet("Line Items");
-            String[] h2 = {"Invoice No", "P.O. No", "Sr", "Product", "Item Code", "HSN/SAC", "Qty", "Unit", "Rate",
+            String[] h2 = {"Invoice No", "Company", "P.O. No", "Sr", "Product", "Item Code", "HSN/SAC", "Qty", "Unit", "Rate",
                     "Taxable Value", "CGST %", "CGST", "SGST %", "SGST", "Total"};
             row(li, 0, head, (Object[]) h2);
             int lr = 1;
@@ -55,20 +61,21 @@ public class ExcelService {
                 for (ItemDto i : b.items()) {
                     Row row = li.createRow(lr++);
                     put(row, 0, b.displayNumber(), null);
-                    put(row, 1, i.poNumber() != null ? i.poNumber() : b.poNumber(), null);
-                    put(row, 2, (double) sr++, null);
-                    put(row, 3, i.name(), null);
-                    put(row, 4, i.itemCode(), null);
-                    put(row, 5, i.hsn(), null);
-                    put(row, 6, i.qty().doubleValue(), null);
-                    put(row, 7, i.unit(), null);
-                    put(row, 8, i.rate().doubleValue(), money);
-                    put(row, 9, i.taxable().doubleValue(), money);
-                    put(row, 10, i.cgstRate().doubleValue(), null);
-                    put(row, 11, i.cgst().doubleValue(), money);
-                    put(row, 12, i.sgstRate().doubleValue(), null);
-                    put(row, 13, i.sgst().doubleValue(), money);
-                    put(row, 14, i.total().doubleValue(), money);
+                    put(row, 1, b.companyDisplayName(), null);
+                    put(row, 2, i.poNumber() != null ? i.poNumber() : b.poNumber(), null);
+                    put(row, 3, (double) sr++, null);
+                    put(row, 4, i.name(), null);
+                    put(row, 5, i.itemCode(), null);
+                    put(row, 6, i.hsn(), null);
+                    put(row, 7, i.qty().doubleValue(), null);
+                    put(row, 8, i.unit(), null);
+                    put(row, 9, i.rate().doubleValue(), money);
+                    put(row, 10, i.taxable().doubleValue(), money);
+                    put(row, 11, i.cgstRate().doubleValue(), null);
+                    put(row, 12, i.cgst().doubleValue(), money);
+                    put(row, 13, i.sgstRate().doubleValue(), null);
+                    put(row, 14, i.sgst().doubleValue(), money);
+                    put(row, 15, i.total().doubleValue(), money);
                 }
             }
             for (int c = 0; c < h2.length; c++) li.setColumnWidth(c, 16 * 256);

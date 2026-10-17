@@ -3,39 +3,71 @@ package com.billing.web;
 import com.billing.domain.CompanySettings;
 import com.billing.dto.Dtos.SettingsDto;
 import com.billing.repo.SettingsRepository;
+import com.billing.service.ApiException;
+import com.billing.service.CompanyAccessService;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/settings")
 public class SettingsController {
     private final SettingsRepository repo;
+    private final CompanyAccessService companyAccess;
 
-    public SettingsController(SettingsRepository repo) { this.repo = repo; }
+    public SettingsController(SettingsRepository repo, CompanyAccessService companyAccess) {
+        this.repo = repo;
+        this.companyAccess = companyAccess;
+    }
 
     @GetMapping
     @Transactional(readOnly = true)
-    public SettingsDto get() { return SettingsDto.of(repo.findById(1L).orElseThrow()); }
+    public SettingsDto get(@RequestHeader(value = "X-Company-Id", defaultValue = "1") String companyId,
+                           Authentication authentication) {
+        long id = companyId(companyId);
+        companyAccess.requireAccess(authentication.getName(), id);
+        return SettingsDto.of(loadCompany(id));
+    }
+
+    @GetMapping("/companies")
+    @Transactional(readOnly = true)
+    public List<com.billing.dto.Dtos.CompanyOption> companies(Authentication authentication) {
+        if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            return companyAccess.allCompanies();
+        }
+        return companyAccess.companies(authentication.getName());
+    }
 
     /** Changing settings never touches finalized bills: they carry their own frozen seller snapshot. */
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
-    public SettingsDto put(@Valid @RequestBody SettingsDto d) {
-        CompanySettings s = repo.findById(1L).orElseThrow();
+    public SettingsDto put(@RequestHeader(value = "X-Company-Id", defaultValue = "1") String companyId,
+                           @Valid @RequestBody SettingsDto d, Authentication authentication) {
+        long id = companyId(companyId);
+        companyAccess.requireAccess(authentication.getName(), id);
+        CompanySettings s = loadCompany(id);
         s.companyName = d.companyName().trim();
+        s.displayName = nz(d.displayName());
         s.address = nz(d.address());
+        s.billingAddress = nz(d.billingAddress());
         s.phone = nz(d.phone());
         s.email = nz(d.email());
         s.gstin = nz(d.gstin());
+        s.pan = nz(d.pan());
         s.bankName = nz(d.bankName());
         s.bankAccount = nz(d.bankAccount());
         s.bankBranch = nz(d.bankBranch());
         s.ifsc = nz(d.ifsc());
+        s.upiId = nz(d.upiId());
+        s.defaultPaymentTerms = nz(d.defaultPaymentTerms());
         s.declaration = nz(d.declaration());
         s.signatureText = nz(d.signatureText());
+        s.authorizedSignatory = nz(d.authorizedSignatory());
+        s.signatoryDesignation = nz(d.signatoryDesignation());
         s.footerNote = nz(d.footerNote());
         s.logo = d.logo() == null || d.logo().isBlank() ? null : d.logo();
         if (s.logo != null && !s.logo.startsWith("data:image/")) {
@@ -52,4 +84,13 @@ public class SettingsController {
     }
 
     private static String nz(String v) { return v == null ? "" : v.trim(); }
+
+    private CompanySettings loadCompany(long id) {
+        return repo.findById(id).orElseThrow(() -> ApiException.notFound("Company not found"));
+    }
+
+    private static long companyId(String key) {
+        try { return Long.parseLong(key); }
+        catch (NumberFormatException e) { throw ApiException.badRequest("Invalid company selection."); }
+    }
 }

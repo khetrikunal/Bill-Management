@@ -21,6 +21,7 @@ class BillServiceTest {
     private BillAuditRepository audits;
     private SettingsRepository settingsRepo;
     private NumberingService numbering;
+    private BillPaymentRepository payments;
     private BillService svc;
     private CompanySettings settings;
 
@@ -30,17 +31,23 @@ class BillServiceTest {
         audits = mock(BillAuditRepository.class);
         settingsRepo = mock(SettingsRepository.class);
         numbering = mock(NumberingService.class);
+        payments = mock(BillPaymentRepository.class);
         settings = new CompanySettings();
         settings.companyName = "Test Co";
         settings.invoicePrefix = "T";
         settings.pageSize = "A4";
         when(settingsRepo.findById(1L)).thenReturn(Optional.of(settings));
+        CompanySettings second = new CompanySettings();
+        second.id = 2L;
+        second.companyName = "PK Corporate Fabric Manufacturing";
+        second.displayName = second.companyName;
+        when(settingsRepo.findById(2L)).thenReturn(Optional.of(second));
         when(bills.save(any(Bill.class))).thenAnswer(inv -> {
             Bill b = inv.getArgument(0);
             if (b.id == null) b.id = 1L;
             return b;
         });
-        svc = new BillService(bills, audits, settingsRepo, numbering, new CalculationService(), new ObjectMapper());
+        svc = new BillService(bills, audits, settingsRepo, numbering, new CalculationService(), new ObjectMapper(), payments);
     }
 
     private static ItemDto item(String po) {
@@ -60,6 +67,47 @@ class BillServiceTest {
         assertNull(d.invoiceNumber());
         assertEquals(0, new BigDecimal("1416.00").compareTo(d.grandTotal()));
         verify(numbering, never()).next(any(), any());
+    }
+
+    @Test
+    void companySelectionIsStoredAndCannotReadAnotherCompanysBill() {
+        BillDto draft = svc.create(request(DocType.TAX_INVOICE, "1", item(null)), "ravi", 2L);
+        assertEquals(2L, draft.companyId());
+        assertEquals("PK Corporate Fabric Manufacturing", draft.companyDisplayName());
+
+        Bill stored = new Bill();
+        stored.id = draft.id();
+        stored.companyId = 2L;
+        stored.docType = DocType.TAX_INVOICE;
+        stored.status = BillStatus.DRAFT;
+        when(bills.findById(draft.id())).thenReturn(Optional.of(stored));
+        assertEquals(HttpStatus.NOT_FOUND, assertThrows(ApiException.class, () -> svc.get(draft.id(), 1L)).status);
+    }
+
+    @Test
+    void paymentEntryUpdatesOutstandingAndIsAudited() {
+        Bill bill = new Bill();
+        bill.id = 8L;
+        bill.companyId = 1L;
+        bill.status = BillStatus.FINAL;
+        bill.docType = DocType.TAX_INVOICE;
+        bill.invoiceDate = LocalDate.of(2026, 4, 28);
+        bill.currency = "INR";
+        bill.buyerName = "Buyer";
+        bill.buyerAddress = "Address";
+        bill.grandTotal = new BigDecimal("100.00");
+        when(bills.findById(8L)).thenReturn(Optional.of(bill));
+        when(payments.save(any(BillPayment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        BillDto result = svc.recordPayment(8L,
+                new PaymentRequest(new BigDecimal("35"), LocalDate.of(2026, 5, 1), "UPI", "TXN-1", "Advance"),
+                "ravi", 1L);
+
+        assertEquals(new BigDecimal("35.00"), result.amountPaid());
+        assertEquals(new BigDecimal("65.00"), result.outstandingBalance());
+        assertEquals("PARTIALLY_PAID", result.paymentStatus());
+        assertEquals(1, result.payments().size());
+        verify(audits).save(argThat(a -> a.action.equals("PAYMENT_RECORDED")));
     }
 
     @Test

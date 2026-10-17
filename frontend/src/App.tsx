@@ -12,6 +12,7 @@ import Login from './pages/Login'
 import Products from './pages/Products'
 import SettingsPage from './pages/SettingsPage'
 import Users from './pages/Users'
+import { CompanyProvider } from './lib/company'
 
 function Guard({ roles, children }: { roles?: Role[]; children: JSX.Element }) {
   const { user, loading } = useAuth()
@@ -25,7 +26,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route element={<Guard><Layout /></Guard>}>
+      <Route element={<Guard><CompanyProvider><Layout /></CompanyProvider></Guard>}>
         <Route index element={<Dashboard />} />
         <Route path="bills" element={<BillList />} />
         <Route path="bills/new" element={<Guard roles={['ADMIN', 'BILLING']}><BillForm /></Guard>} />

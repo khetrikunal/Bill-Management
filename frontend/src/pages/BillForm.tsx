@@ -5,6 +5,7 @@ import { Alert, Field, PageHeader, Spinner } from '../components/ui'
 import { api, ApiError } from '../lib/api'
 import { amountInWords, calcLine, calcTotals, money } from '../lib/calc'
 import type { Bill, Customer, DocType, Item, Product, Settings } from '../lib/types'
+import { useCompany } from '../lib/company'
 
 const TYPES: Array<{ code: DocType; title: string; text: string }> = [
   { code: 'TAX_INVOICE', title: 'Tax Invoice (single P.O.)', text: 'One P.O. number for the whole bill. Matches Sheet1 of your Excel file.' },
@@ -18,6 +19,7 @@ export default function BillForm() {
   const [sp] = useSearchParams()
   const nav = useNavigate()
   const editing = !!id
+  const { companies, companyId, selectCompany } = useCompany()
 
   const [settings, setSettings] = useState<Settings | null>(null)
   const [customers, setCustomers] = useState<Customer[]>([])
@@ -30,12 +32,17 @@ export default function BillForm() {
 
   const [docType, setDocType] = useState<DocType>((sp.get('type') as DocType) === 'MULTI_PO_INVOICE' ? 'MULTI_PO_INVOICE' : 'TAX_INVOICE')
   const [invoiceDate, setInvoiceDate] = useState(today())
+  const [dueDate, setDueDate] = useState('')
+  const [paymentTerms, setPaymentTerms] = useState('')
   const [poNumber, setPoNumber] = useState('')
   const [transactionRef, setTransactionRef] = useState('')
   const [buyerId, setBuyerId] = useState<number | null>(null)
   const [buyerName, setBuyerName] = useState('')
   const [buyerAddress, setBuyerAddress] = useState('')
   const [buyerGstin, setBuyerGstin] = useState('')
+  const [buyerPhone, setBuyerPhone] = useState('')
+  const [buyerEmail, setBuyerEmail] = useState('')
+  const [shippingAddress, setShippingAddress] = useState('')
   const [currency, setCurrency] = useState('INR')
   const [notes, setNotes] = useState('')
   const [version, setVersion] = useState<number | null>(null)
@@ -48,31 +55,53 @@ export default function BillForm() {
   })
 
   useEffect(() => {
+    const invoiceCompanyId = Number(sp.get('companyId'))
+    if (editing && invoiceCompanyId && invoiceCompanyId !== companyId) {
+      selectCompany(invoiceCompanyId)
+      return
+    }
+    let active = true
+    setLoading(true)
+    setSettings(null);
     (async () => {
       try {
         const [s, c, p] = await Promise.all([
           api.get<Settings>('/settings'), api.get<Customer[]>('/customers'), api.get<Product[]>('/products'),
         ])
+        if (!active) return
         setSettings(s); setCustomers(c); setProducts(p.filter(x => x.active))
         if (id) {
           const b = await api.get<Bill>(`/bills/${id}`)
+          if (!active) return
+          if (b.companyId !== companyId) {
+            selectCompany(b.companyId)
+            return
+          }
           if (b.status !== 'DRAFT') { nav(`/bills/${id}`, { replace: true }); return }
           setDocType(b.docType); setInvoiceDate(b.invoiceDate); setPoNumber(b.poNumber ?? '')
+          setDueDate(b.dueDate ?? ''); setPaymentTerms(b.paymentTerms ?? '')
           setTransactionRef(b.transactionRef ?? ''); setBuyerId(b.buyerId); setBuyerName(b.buyerName)
-          setBuyerAddress(b.buyerAddress); setBuyerGstin(b.buyerGstin); setCurrency(b.currency)
+          setBuyerAddress(b.buyerAddress); setBuyerGstin(b.buyerGstin); setBuyerPhone(b.buyerPhone)
+          setBuyerEmail(b.buyerEmail); setShippingAddress(b.shippingAddress); setCurrency(b.currency)
           setNotes(b.notes ?? ''); setVersion(b.version)
           setItems(b.items.map(i => ({
             poNumber: i.poNumber ?? '', name: i.name, itemCode: i.itemCode ?? '', hsn: i.hsn ?? '', qty: String(i.qty),
             unit: i.unit, rate: String(i.rate), cgstRate: String(i.cgstRate), sgstRate: String(i.sgstRate),
           })))
         } else {
+          setInvoiceDate(today()); setPoNumber(''); setTransactionRef('')
+          setDueDate(''); setPaymentTerms(s.defaultPaymentTerms || '')
+          setBuyerId(null); setBuyerName(''); setBuyerAddress(''); setBuyerGstin('')
+          setBuyerPhone(''); setBuyerEmail(''); setShippingAddress('')
+          setNotes(''); setVersion(null)
           setCurrency(s.defaultCurrency)
           setItems([blankItem(s)])
         }
-      } catch (e) { setErr((e as Error).message) } finally { setLoading(false) }
+      } catch (e) { if (active) setErr((e as Error).message) } finally { if (active) setLoading(false) }
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id])
+    return () => { active = false }
+  }, [id, companyId])
 
   // ---- live calculation (preview only; the server recalculates on save)
   const calc = useMemo(() => {
@@ -97,7 +126,10 @@ export default function BillForm() {
   function pickCustomer(v: string) {
     if (!v) { setBuyerId(null); return }
     const c = customers.find(x => String(x.id) === v)
-    if (c) { setBuyerId(c.id ?? null); setBuyerName(c.name); setBuyerAddress(c.address); setBuyerGstin(c.gstin) }
+    if (c) {
+      setBuyerId(c.id ?? null); setBuyerName(c.name); setBuyerAddress(c.address); setBuyerGstin(c.gstin)
+      setBuyerPhone(c.phone); setBuyerEmail(c.email)
+    }
   }
 
   function validate(): Record<string, string> {
@@ -135,8 +167,10 @@ export default function BillForm() {
         bid = c.id ?? null
       }
       const body = {
-        docType, invoiceDate, transactionRef: transactionRef || null, poNumber: docType === 'TAX_INVOICE' ? poNumber : null,
-        buyerId: bid, buyerName, buyerAddress, buyerGstin, currency, notes: notes || null, version,
+        docType, invoiceDate, dueDate: dueDate || null, paymentTerms, transactionRef: transactionRef || null,
+        poNumber: docType === 'TAX_INVOICE' ? poNumber : null,
+        buyerId: bid, buyerName, buyerAddress, buyerGstin, buyerPhone, buyerEmail, shippingAddress,
+        currency, notes: notes || null, version,
         items: items.map(i => ({
           poNumber: docType === 'MULTI_PO_INVOICE' ? i.poNumber : null, name: i.name, itemCode: i.itemCode || null, hsn: i.hsn || null,
           qty: toNum(i.qty), unit: i.unit, rate: toNum(i.rate), cgstRate: toNum(i.cgstRate), sgstRate: toNum(i.sgstRate),
@@ -157,7 +191,8 @@ export default function BillForm() {
 
   const preview: PreviewData = {
     docType, number: 'DRAFT', invoiceDate, poNumber, transactionRef: transactionRef || null,
-    buyerName, buyerAddress, buyerGstin, currency,
+    buyerName, buyerAddress, buyerGstin, buyerPhone, buyerEmail, shippingAddress,
+    dueDate, paymentTerms, currency,
     seller: { ...settings, logo: settings.logo, pageSize: settings.pageSize },
     items: items.map((i, n) => ({
       poNumber: i.poNumber, name: i.name, itemCode: i.itemCode, hsn: i.hsn, qty: toNum(i.qty), unit: i.unit,
@@ -185,6 +220,15 @@ export default function BillForm() {
       ) : (
         <div className="space-y-4">
           {!editing && (
+            <>
+            <section className="card">
+              <Field label="Select Business / Company">
+                <select className="input" value={companyId} onChange={e => selectCompany(Number(e.target.value))}>
+                  {companies.map(company => <option key={company.id} value={company.id}>{company.displayName}</option>)}
+                </select>
+              </Field>
+              <p className="mt-2 text-sm text-slate-600">Invoices and numbering are kept separate for each business.</p>
+            </section>
             <div className="grid gap-3 sm:grid-cols-2">
               {TYPES.map(t => (
                 <button key={t.code} type="button" onClick={() => setDocType(t.code)}
@@ -193,12 +237,16 @@ export default function BillForm() {
                 </button>
               ))}
             </div>
+            </>
           )}
+          {editing && <div className="rounded-lg bg-slate-100 px-4 py-3 text-sm font-semibold">Business: {settings.displayName || settings.companyName}</div>}
 
           <section className="card grid gap-4 sm:grid-cols-2">
             <h2 className="text-lg font-semibold sm:col-span-2">Bill details</h2>
             <Field label="Invoice date" error={E('invoiceDate')}><input type="date" className="input" value={invoiceDate} onChange={e => setInvoiceDate(e.target.value)} /></Field>
+            <Field label="Due date"><input type="date" className="input" value={dueDate} onChange={e => setDueDate(e.target.value)} /></Field>
             <Field label="Invoice number"><input className="input" value="Assigned when you finalize" disabled /></Field>
+            <Field label="Payment terms"><input className="input" value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} /></Field>
             {!multi && <Field label="P.O. number" error={E('poNumber')}><input className="input" inputMode="numeric" value={poNumber} onChange={e => setPoNumber(e.target.value)} /></Field>}
             <Field label="Reference / transaction no. (optional, links related bills)" error={E('transactionRef')}><input className="input" value={transactionRef} onChange={e => setTransactionRef(e.target.value)} /></Field>
             <Field label="Currency" error={E('currency')}>
@@ -219,6 +267,9 @@ export default function BillForm() {
             <Field label="Buyer name" error={E('buyerName')}><input className="input" value={buyerName} onChange={e => { setBuyerName(e.target.value); setBuyerId(null) }} /></Field>
             <Field label="Buyer GSTIN" error={E('buyerGstin')}><input className="input uppercase" value={buyerGstin} onChange={e => setBuyerGstin(e.target.value.toUpperCase())} /></Field>
             <Field label="Buyer address" error={E('buyerAddress')} className="sm:col-span-2"><textarea className="input" rows={3} value={buyerAddress} onChange={e => setBuyerAddress(e.target.value)} /></Field>
+            <Field label="Buyer phone"><input className="input" value={buyerPhone} onChange={e => setBuyerPhone(e.target.value)} /></Field>
+            <Field label="Buyer email"><input className="input" type="email" value={buyerEmail} onChange={e => setBuyerEmail(e.target.value)} /></Field>
+            <Field label="Shipping address (optional)" className="sm:col-span-2"><textarea className="input" rows={2} value={shippingAddress} onChange={e => setShippingAddress(e.target.value)} /></Field>
             {!buyerId && <label className="flex items-center gap-2 text-sm sm:col-span-2"><input type="checkbox" className="h-5 w-5" checked={remember} onChange={e => setRemember(e.target.checked)} /> Save this buyer for next time</label>}
           </section>
 
