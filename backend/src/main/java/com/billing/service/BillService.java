@@ -3,11 +3,17 @@ package com.billing.service;
 import com.billing.domain.*;
 import com.billing.dto.Dtos.*;
 import com.billing.repo.*;
+<<<<<<< HEAD
 import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Subquery;
+=======
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.criteria.Predicate;
+>>>>>>> origin/main
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -26,6 +32,7 @@ public class BillService {
     private final NumberingService numbering;
     private final CalculationService calc;
     private final ObjectMapper om;
+<<<<<<< HEAD
     private final BillPaymentRepository payments;
 
     public BillService(BillRepository bills, BillAuditRepository audits, SettingsRepository settingsRepo,
@@ -37,17 +44,26 @@ public class BillService {
     public BillService(BillRepository bills, BillAuditRepository audits, SettingsRepository settingsRepo,
                        NumberingService numbering, CalculationService calc, ObjectMapper om,
                        BillPaymentRepository payments) {
+=======
+
+    public BillService(BillRepository bills, BillAuditRepository audits, SettingsRepository settingsRepo,
+                       NumberingService numbering, CalculationService calc, ObjectMapper om) {
+>>>>>>> origin/main
         this.bills = bills;
         this.audits = audits;
         this.settingsRepo = settingsRepo;
         this.numbering = numbering;
         this.calc = calc;
         this.om = om;
+<<<<<<< HEAD
         this.payments = payments;
+=======
+>>>>>>> origin/main
     }
 
     // ------------------------------------------------------------------ queries
     @Transactional(readOnly = true)
+<<<<<<< HEAD
     public BillDto get(Long id) { return get(id, 1L); }
 
     @Transactional(readOnly = true)
@@ -59,6 +75,12 @@ public class BillService {
     @Transactional(readOnly = true)
     public List<AuditDto> history(Long id, Long companyId) {
         load(id, companyId);
+=======
+    public BillDto get(Long id) { return toDto(load(id)); }
+
+    @Transactional(readOnly = true)
+    public List<AuditDto> history(Long id) {
+>>>>>>> origin/main
         return audits.findByBillIdOrderByCreatedAtAscIdAsc(id).stream()
                 .map(a -> new AuditDto(a.action, a.username, a.detail, a.createdAt)).toList();
     }
@@ -66,23 +88,31 @@ public class BillService {
     @Transactional(readOnly = true)
     public PageDto<BillSummary> search(String q, LocalDate from, LocalDate to, DocType type, BillStatus status,
                                        String sort, String dir, int page, int size) {
+<<<<<<< HEAD
         return search(q, from, to, type, status, null, sort, dir, page, size, 1L);
     }
 
     @Transactional(readOnly = true)
     public PageDto<BillSummary> search(String q, LocalDate from, LocalDate to, DocType type, BillStatus status,
                                        String paymentStatus, String sort, String dir, int page, int size, Long companyId) {
+=======
+>>>>>>> origin/main
         String sortField = SORTABLE.contains(sort) ? sort : "createdAt";
         Sort.Direction d = "asc".equalsIgnoreCase(dir) ? Sort.Direction.ASC : Sort.Direction.DESC;
         Pageable p = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100),
                 Sort.by(d, sortField).and(Sort.by(Sort.Direction.DESC, "id")));
+<<<<<<< HEAD
         Page<Bill> res = bills.findAll(spec(q, from, to, type, status, paymentStatus, companyId), p);
+=======
+        Page<Bill> res = bills.findAll(spec(q, from, to, type, status), p);
+>>>>>>> origin/main
         return new PageDto<>(res.getContent().stream().map(this::toSummary).toList(), res.getNumber(),
                 res.getSize(), res.getTotalElements(), res.getTotalPages());
     }
 
     @Transactional(readOnly = true)
     public List<BillDto> exportAll(String q, LocalDate from, LocalDate to, DocType type, BillStatus status) {
+<<<<<<< HEAD
         return exportAll(q, from, to, type, status, null, 1L);
     }
 
@@ -98,10 +128,19 @@ public class BillService {
 
     @Transactional(readOnly = true)
     public Dashboard dashboard(Long companyId) {
+=======
+        Pageable p = PageRequest.of(0, 5000, Sort.by(Sort.Direction.DESC, "invoiceDate").and(Sort.by("id")));
+        return bills.findAll(spec(q, from, to, type, status), p).stream().map(this::toDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public Dashboard dashboard() {
+>>>>>>> origin/main
         ZoneId zone = ZoneId.of("Asia/Kolkata");
         LocalDate first = LocalDate.now(zone).withDayOfMonth(1);
         Instant from = first.atStartOfDay(zone).toInstant();
         Instant to = first.plusMonths(1).atStartOfDay(zone).toInstant();
+<<<<<<< HEAD
         List<Object[]> rawTotals = companyId == null ? bills.finalizedTotals(first, first.plusMonths(1))
                 : bills.finalizedTotalsByCompany(companyId, first, first.plusMonths(1));
         List<CurrencyTotal> totals = rawTotals.stream()
@@ -149,6 +188,17 @@ public class BillService {
 
     private Specification<Bill> spec(String q, LocalDate from, LocalDate to, DocType type, BillStatus status,
                                      String paymentStatus, Long companyId) {
+=======
+        List<CurrencyTotal> totals = bills.finalizedTotals(first, first.plusMonths(1)).stream()
+                .map(r -> new CurrencyTotal((String) r[0], (BigDecimal) r[1])).toList();
+        return new Dashboard(bills.count(), bills.countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(from, to),
+                bills.countByStatus(BillStatus.DRAFT), bills.countByStatus(BillStatus.FINAL),
+                bills.countByStatus(BillStatus.CANCELLED),
+                bills.findTop5ByOrderByCreatedAtDesc().stream().map(this::toSummary).toList(), totals);
+    }
+
+    private Specification<Bill> spec(String q, LocalDate from, LocalDate to, DocType type, BillStatus status) {
+>>>>>>> origin/main
         return (root, query, cb) -> {
             List<Predicate> ps = new ArrayList<>();
             if (q != null && !q.isBlank()) {
@@ -162,6 +212,7 @@ public class BillService {
             if (to != null) ps.add(cb.lessThanOrEqualTo(root.get("invoiceDate"), to));
             if (type != null) ps.add(cb.equal(root.get("docType"), type));
             if (status != null) ps.add(cb.equal(root.get("status"), status));
+<<<<<<< HEAD
             if (companyId != null) ps.add(cb.equal(root.get("companyId"), companyId));
             if (paymentStatus != null && !paymentStatus.isBlank()) {
                 String normalized = paymentStatus.toUpperCase(Locale.ROOT);
@@ -184,6 +235,8 @@ public class BillService {
                             cb.lessThan(paid, total)));
                 } else if ("CANCELLED".equals(normalized)) ps.add(cb.equal(root.get("status"), BillStatus.CANCELLED));
             }
+=======
+>>>>>>> origin/main
             return cb.and(ps.toArray(new Predicate[0]));
         };
     }
@@ -191,6 +244,7 @@ public class BillService {
     // ------------------------------------------------------------------ commands
     @Transactional
     public BillDto create(BillRequest r, String user) {
+<<<<<<< HEAD
         return create(r, user, 1L);
     }
 
@@ -199,6 +253,9 @@ public class BillService {
         requireCompany(companyId);
         Bill b = new Bill();
         b.companyId = companyId;
+=======
+        Bill b = new Bill();
+>>>>>>> origin/main
         b.createdBy = user;
         b.status = BillStatus.DRAFT;
         apply(b, r);
@@ -209,12 +266,16 @@ public class BillService {
 
     @Transactional
     public BillDto update(Long id, BillRequest r, String user) {
+<<<<<<< HEAD
         return update(id, r, user, 1L);
     }
 
     @Transactional
     public BillDto update(Long id, BillRequest r, String user, Long companyId) {
         Bill b = load(id, companyId);
+=======
+        Bill b = load(id);
+>>>>>>> origin/main
         if (b.status != BillStatus.DRAFT) {
             throw ApiException.conflict("Only draft bills can be edited. Duplicate this bill to make a corrected one.");
         }
@@ -233,18 +294,26 @@ public class BillService {
 
     @Transactional
     public BillDto finalizeBill(Long id, String user) {
+<<<<<<< HEAD
         return finalizeBill(id, user, 1L);
     }
 
     @Transactional
     public BillDto finalizeBill(Long id, String user, Long companyId) {
         Bill b = load(id, companyId);
+=======
+        Bill b = load(id);
+>>>>>>> origin/main
         if (b.status != BillStatus.DRAFT) throw ApiException.conflict("Only a draft can be finalized.");
         if (b.items.isEmpty() || b.grandTotal.signum() <= 0) {
             throw ApiException.badRequest("A bill needs at least one item with a positive total.");
         }
         calc.calculate(b); // re-verify totals from line items before locking them in
+<<<<<<< HEAD
         CompanySettings s = settingsRepo.findById(companyId).orElseThrow();
+=======
+        CompanySettings s = settingsRepo.findById(1L).orElseThrow();
+>>>>>>> origin/main
         if (s.companyName == null || s.companyName.isBlank()) {
             throw ApiException.badRequest("Fill in Company Settings before finalizing bills.");
         }
@@ -264,12 +333,16 @@ public class BillService {
 
     @Transactional
     public BillDto cancel(Long id, String reason, String user) {
+<<<<<<< HEAD
         return cancel(id, reason, user, 1L);
     }
 
     @Transactional
     public BillDto cancel(Long id, String reason, String user, Long companyId) {
         Bill b = load(id, companyId);
+=======
+        Bill b = load(id);
+>>>>>>> origin/main
         if (b.status != BillStatus.FINAL) throw ApiException.conflict("Only finalized bills can be cancelled.");
         b.status = BillStatus.CANCELLED;
         b.cancelledAt = Instant.now();
@@ -282,12 +355,16 @@ public class BillService {
 
     @Transactional
     public void deleteDraft(Long id, String user) {
+<<<<<<< HEAD
         deleteDraft(id, user, 1L);
     }
 
     @Transactional
     public void deleteDraft(Long id, String user, Long companyId) {
         Bill b = load(id, companyId);
+=======
+        Bill b = load(id);
+>>>>>>> origin/main
         if (b.status != BillStatus.DRAFT) throw ApiException.conflict("Only drafts can be deleted. Cancel finalized bills instead.");
         bills.delete(b);
         audit(id, "DRAFT_DELETED", user, "Draft deleted");
@@ -295,6 +372,7 @@ public class BillService {
 
     @Transactional
     public BillDto duplicate(Long id, String user) {
+<<<<<<< HEAD
         return duplicate(id, user, 1L);
     }
 
@@ -307,15 +385,25 @@ public class BillService {
         n.status = BillStatus.DRAFT;
         n.invoiceDate = LocalDate.now(ZoneId.of("Asia/Kolkata"));
         n.paymentTerms = src.paymentTerms;
+=======
+        Bill src = load(id);
+        Bill n = new Bill();
+        n.docType = src.docType;
+        n.status = BillStatus.DRAFT;
+        n.invoiceDate = LocalDate.now(ZoneId.of("Asia/Kolkata"));
+>>>>>>> origin/main
         n.transactionRef = src.transactionRef;
         n.poNumber = src.poNumber;
         n.buyerId = src.buyerId;
         n.buyerName = src.buyerName;
         n.buyerAddress = src.buyerAddress;
         n.buyerGstin = src.buyerGstin;
+<<<<<<< HEAD
         n.buyerPhone = src.buyerPhone;
         n.buyerEmail = src.buyerEmail;
         n.shippingAddress = src.shippingAddress;
+=======
+>>>>>>> origin/main
         n.currency = src.currency;
         n.notes = src.notes;
         n.createdBy = user;
@@ -342,6 +430,7 @@ public class BillService {
         return toDto(n);
     }
 
+<<<<<<< HEAD
     @Transactional
     public BillDto recordPayment(Long id, PaymentRequest request, String user, Long companyId) {
         Bill bill = load(id, companyId);
@@ -371,11 +460,14 @@ public class BillService {
         return toDto(bill);
     }
 
+=======
+>>>>>>> origin/main
     // ------------------------------------------------------------------ helpers
     private Bill load(Long id) {
         return bills.findById(id).orElseThrow(() -> ApiException.notFound("Bill not found"));
     }
 
+<<<<<<< HEAD
     private Bill load(Long id, Long companyId) {
         Bill bill = load(id);
         if (!Objects.equals(bill.companyId, companyId)) throw ApiException.notFound("Bill not found");
@@ -393,14 +485,22 @@ public class BillService {
         b.invoiceDate = r.invoiceDate();
         b.dueDate = r.dueDate();
         b.paymentTerms = r.paymentTerms() == null ? "" : r.paymentTerms().trim();
+=======
+    private void apply(Bill b, BillRequest r) {
+        b.docType = r.docType();
+        b.invoiceDate = r.invoiceDate();
+>>>>>>> origin/main
         b.transactionRef = blankToNull(r.transactionRef());
         b.buyerId = r.buyerId();
         b.buyerName = r.buyerName().trim();
         b.buyerAddress = r.buyerAddress().trim();
         b.buyerGstin = r.buyerGstin() == null ? "" : r.buyerGstin().trim();
+<<<<<<< HEAD
         b.buyerPhone = r.buyerPhone() == null ? "" : r.buyerPhone().trim();
         b.buyerEmail = r.buyerEmail() == null ? "" : r.buyerEmail().trim();
         b.shippingAddress = r.shippingAddress() == null ? "" : r.shippingAddress().trim();
+=======
+>>>>>>> origin/main
         b.currency = r.currency();
         b.notes = blankToNull(r.notes());
 
@@ -454,17 +554,23 @@ public class BillService {
     private static String blankToNull(String s) { return isBlank(s) ? null : s.trim(); }
 
     BillSummary toSummary(Bill b) {
+<<<<<<< HEAD
         BigDecimal paid = totalPaid(b);
         CompanySettings company = requireCompany(b.companyId);
         return new BillSummary(b.id, b.companyId, companyDisplayName(company), b.docType, b.docType.label, b.status,
                 b.invoiceNumber, display(b), b.buyerName, b.invoiceDate, b.dueDate, b.currency, b.grandTotal, paid,
                 b.grandTotal.subtract(paid).max(BigDecimal.ZERO), paymentStatus(b, paid), b.createdAt);
+=======
+        return new BillSummary(b.id, b.docType, b.docType.label, b.status, b.invoiceNumber, display(b), b.buyerName,
+                b.invoiceDate, b.currency, b.grandTotal, b.createdAt);
+>>>>>>> origin/main
     }
 
     BillDto toDto(Bill b) {
         SellerSnapshot seller;
         try {
             seller = b.sellerSnapshot != null ? om.readValue(b.sellerSnapshot, SellerSnapshot.class)
+<<<<<<< HEAD
                     : SellerSnapshot.of(requireCompany(b.companyId));
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Corrupt seller snapshot for bill " + b.id, e);
@@ -502,5 +608,18 @@ public class BillService {
     private static String companyDisplayName(CompanySettings settings) {
         return settings.displayName == null || settings.displayName.isBlank()
                 ? settings.companyName : settings.displayName;
+=======
+                    : SellerSnapshot.of(settingsRepo.findById(1L).orElseThrow());
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Corrupt seller snapshot for bill " + b.id, e);
+        }
+        List<ItemDto> items = b.items.stream().map(i -> new ItemDto(i.id, i.poNumber, i.name, i.itemCode, i.hsn,
+                i.qty, i.unit, i.rate, i.cgstRate, i.sgstRate, i.taxable, i.cgst, i.sgst, i.total)).toList();
+        return new BillDto(b.id, b.docType, b.docType.label, b.status, b.invoiceNumber, display(b), b.invoiceDate,
+                b.transactionRef, b.poNumber, b.buyerId, b.buyerName, b.buyerAddress, b.buyerGstin, b.currency,
+                b.notes, seller, items, b.totalTaxable, b.totalCgst, b.totalSgst, b.totalTax, b.grandTotal,
+                b.amountInWords, b.createdBy, b.createdAt, b.updatedAt, b.finalizedAt, b.cancelledAt,
+                b.cancelReason, b.duplicatedFrom, b.version);
+>>>>>>> origin/main
     }
 }

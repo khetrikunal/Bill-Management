@@ -5,6 +5,10 @@ import com.billing.domain.BillStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+<<<<<<< HEAD
+=======
+import java.math.BigDecimal;
+>>>>>>> origin/main
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -13,6 +17,7 @@ public interface BillRepository extends JpaRepository<Bill, Long>, JpaSpecificat
     long countByStatus(BillStatus status);
     long countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(Instant from, Instant to);
     List<Bill> findTop5ByOrderByCreatedAtDesc();
+<<<<<<< HEAD
     long countByCompanyId(Long companyId);
     long countByCompanyIdAndStatus(Long companyId, BillStatus status);
     long countByCompanyIdAndCreatedAtGreaterThanEqualAndCreatedAtLessThan(Long companyId, Instant from, Instant to);
@@ -26,10 +31,13 @@ public interface BillRepository extends JpaRepository<Bill, Long>, JpaSpecificat
             + "and b.status = com.billing.domain.BillStatus.FINAL and b.dueDate < :date "
             + "and b.grandTotal > coalesce((select sum(p.amount) from BillPayment p where p.bill.id = b.id), 0)")
     long countOverdueByCompany(Long companyId, LocalDate date);
+=======
+>>>>>>> origin/main
 
     @Query("select b.currency, sum(b.grandTotal) from Bill b where b.status = com.billing.domain.BillStatus.FINAL "
             + "and b.invoiceDate >= :from and b.invoiceDate < :to group by b.currency")
     List<Object[]> finalizedTotals(LocalDate from, LocalDate to);
+<<<<<<< HEAD
 
     @Query("select b.currency, sum(b.grandTotal) from Bill b where b.companyId = :companyId "
             + "and b.status = com.billing.domain.BillStatus.FINAL and b.invoiceDate >= :from "
@@ -39,4 +47,6 @@ public interface BillRepository extends JpaRepository<Bill, Long>, JpaSpecificat
     @Query("select b.currency, sum(b.grandTotal) from Bill b where b.companyId = :companyId "
             + "and b.status = com.billing.domain.BillStatus.FINAL group by b.currency")
     List<Object[]> billedTotalsByCompany(Long companyId);
+=======
+>>>>>>> origin/main
 }

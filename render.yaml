@@ -1,0 +1,35 @@
+# Render Blueprint: creates the PostgreSQL database and the Spring Boot backend.
+# Check plan names in the Render dashboard if the blueprint complains.
+databases:
+  - name: billing-db
+    databaseName: billing
+    user: billing
+    plan: free
+
+services:
+  - type: web
+    name: billing-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_HOST
+        fromDatabase: { name: billing-db, property: host }
+      - key: DB_PORT
+        fromDatabase: { name: billing-db, property: port }
+      - key: DB_NAME
+        fromDatabase: { name: billing-db, property: database }
+      - key: DB_USER
+        fromDatabase: { name: billing-db, property: user }
+      - key: DB_PASSWORD
+        fromDatabase: { name: billing-db, property: password }
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false          # you type this in the Render dashboard
+      - key: JAVA_TOOL_OPTIONS
+        value: -Xmx256m -XX:MaxMetaspaceSize=128m -Xss512k -XX:ReservedCodeCacheSize=48m -XX:+UseSerialGC -XX:TieredStopAtLevel=1

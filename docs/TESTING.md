@@ -5,7 +5,11 @@
 * Frontend: `cd frontend && npm test` – same formulas and words on the client.
 
 ## Manual checklist (run once after setup)
+<<<<<<< HEAD
 1. Create and finalize an SSET *single P.O.* bill → number uses the configured SSET prefix and financial year.
+=======
+1. Create a *single P.O.* bill, save, preview, finalize → number like `SSE-2026-27-0001`.
+>>>>>>> origin/main
 2. Create a *multiple P.O.* bill with two P.O. groups; check grouping on the PDF.
 3. Compare each PDF with the Excel print (Calibri vs Helvetica font is the only expected difference).
 4. Change qty/rate/GST % and confirm live totals; try qty 0, negative rate, bad HSN/GSTIN → rejected.
@@ -15,8 +19,14 @@
 8. Finalize two bills quickly from two browsers → numbers are consecutive, no duplicates.
 9. Edit a finalized bill → blocked; duplicate → new draft; cancel (admin) → number stays, PDF shows CANCELLED.
 10. Log in as Viewer → no create/edit buttons, API write calls return 403.
+<<<<<<< HEAD
 11. Switch between SSET and PK Corporate. Confirm profiles load independently and old finalized invoices retain their seller snapshots.
 12. Create and finalize a bill for each company. Confirm numbering sequences are independent, and a user without a company's access receives 403 for its records.
 13. Record a partial payment and confirm balance/status/history; record the remainder. Test an overdue due date and the dashboard/list filters.
 14. Products → Import → "Your workbook layout", sheet `Sheet2` → preview, then import.
 15. Bill Records: search, company/date/type/invoice/payment-status filters, sort, pagination, Export to Excel.
+=======
+11. Change company name in Settings → old finalized bill still prints the old name.
+12. Products → Import → "Your workbook layout", sheet `Sheet2` → preview, then import.
+13. Bill Records: search, date/type/status filters, sort, pagination, Export to Excel.
+>>>>>>> origin/main

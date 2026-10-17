@@ -21,7 +21,10 @@ class BillServiceTest {
     private BillAuditRepository audits;
     private SettingsRepository settingsRepo;
     private NumberingService numbering;
+<<<<<<< HEAD
     private BillPaymentRepository payments;
+=======
+>>>>>>> origin/main
     private BillService svc;
     private CompanySettings settings;
 
@@ -31,23 +34,33 @@ class BillServiceTest {
         audits = mock(BillAuditRepository.class);
         settingsRepo = mock(SettingsRepository.class);
         numbering = mock(NumberingService.class);
+<<<<<<< HEAD
         payments = mock(BillPaymentRepository.class);
+=======
+>>>>>>> origin/main
         settings = new CompanySettings();
         settings.companyName = "Test Co";
         settings.invoicePrefix = "T";
         settings.pageSize = "A4";
         when(settingsRepo.findById(1L)).thenReturn(Optional.of(settings));
+<<<<<<< HEAD
         CompanySettings second = new CompanySettings();
         second.id = 2L;
         second.companyName = "PK Corporate Fabric Manufacturing";
         second.displayName = second.companyName;
         when(settingsRepo.findById(2L)).thenReturn(Optional.of(second));
+=======
+>>>>>>> origin/main
         when(bills.save(any(Bill.class))).thenAnswer(inv -> {
             Bill b = inv.getArgument(0);
             if (b.id == null) b.id = 1L;
             return b;
         });
+<<<<<<< HEAD
         svc = new BillService(bills, audits, settingsRepo, numbering, new CalculationService(), new ObjectMapper(), payments);
+=======
+        svc = new BillService(bills, audits, settingsRepo, numbering, new CalculationService(), new ObjectMapper());
+>>>>>>> origin/main
     }
 
     private static ItemDto item(String po) {
@@ -70,6 +83,7 @@ class BillServiceTest {
     }
 
     @Test
+<<<<<<< HEAD
     void companySelectionIsStoredAndCannotReadAnotherCompanysBill() {
         BillDto draft = svc.create(request(DocType.TAX_INVOICE, "1", item(null)), "ravi", 2L);
         assertEquals(2L, draft.companyId());
@@ -111,6 +125,8 @@ class BillServiceTest {
     }
 
     @Test
+=======
+>>>>>>> origin/main
     void singlePoInvoiceRequiresHeaderPo() {
         ApiException e = assertThrows(ApiException.class,
                 () -> svc.create(request(DocType.TAX_INVOICE, " ", item(null)), "ravi"));

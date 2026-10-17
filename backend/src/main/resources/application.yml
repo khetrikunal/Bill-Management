@@ -1,8 +1,17 @@
 spring:
   datasource:
+<<<<<<< HEAD
     url: ${DB_URL:jdbc:postgresql://localhost:5432/billing}
     username: ${DB_USER:billing}
     password: ${DB_PASSWORD:2504}
+=======
+    url: ${DB_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:billing}}
+    username: ${DB_USER:billing}
+    password: ${DB_PASSWORD:}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+>>>>>>> origin/main
   jpa:
     open-in-view: false
     hibernate:
@@ -14,6 +23,14 @@ spring:
       write-dates-as-timestamps: false
 server:
   port: ${PORT:8080}
+<<<<<<< HEAD
+=======
+  tomcat:
+    threads:
+      max: 20
+      min-spare: 2
+    max-connections: 200
+>>>>>>> origin/main
   error:
     include-message: never
     include-stacktrace: never
@@ -26,5 +43,10 @@ app:
   jwt-secret: ${JWT_SECRET:}
   jwt-expiry-minutes: ${JWT_EXPIRY_MINUTES:480}
   cors-origins: ${CORS_ORIGINS:http://localhost:5173}
+<<<<<<< HEAD
   admin-username: ${ADMIN_USERNAME:Admin}
   admin-password: ${ADMIN_PASSWORD:admin@1234}
+=======
+  admin-username: ${ADMIN_USERNAME:admin}
+  admin-password: ${ADMIN_PASSWORD:}
+>>>>>>> origin/main

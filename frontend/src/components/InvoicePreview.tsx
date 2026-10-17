@@ -11,12 +11,18 @@ export interface PreviewData {
   docType: DocType
   number: string            // invoice number or "DRAFT"
   invoiceDate: string       // yyyy-mm-dd
+<<<<<<< HEAD
   dueDate?: string | null
   paymentTerms?: string
   poNumber?: string | null
   transactionRef?: string | null
   buyerName: string; buyerAddress: string; buyerGstin: string
   buyerPhone?: string; buyerEmail?: string; shippingAddress?: string
+=======
+  poNumber?: string | null
+  transactionRef?: string | null
+  buyerName: string; buyerAddress: string; buyerGstin: string
+>>>>>>> origin/main
   currency: string
   seller: Seller
   items: PreviewItem[]
@@ -120,20 +126,30 @@ export default function InvoicePreview({ data, copy = 'ORIGINAL' }: { data: Prev
             <tr>
               <td colSpan={8} style={{ border: b, padding: 6, verticalAlign: 'top' }}>
                 {s.logo && <img src={s.logo} alt="" style={{ maxHeight: 48, maxWidth: 120, marginBottom: 4 }} />}
+<<<<<<< HEAD
                 <div style={{ fontSize: 14, fontWeight: 700 }}>{s.displayName || s.companyName}</div>
                 {s.displayName && s.displayName !== s.companyName && <div style={{ fontSize: 10 }}>{s.companyName}</div>}
+=======
+                <div style={{ fontSize: 14, fontWeight: 700 }}>{s.companyName}</div>
+>>>>>>> origin/main
                 <div style={{ fontSize: 11, whiteSpace: 'pre-line' }}>{s.address}</div>
                 {s.phone && <div style={{ fontSize: 11 }}>Mobile: {s.phone}</div>}
                 {s.email && <div style={{ fontSize: 11 }}>Mail-Id: {s.email}</div>}
                 {s.gstin && <div style={{ fontSize: 11, fontWeight: 700 }}>GSTIN: {s.gstin}</div>}
+<<<<<<< HEAD
                 {s.pan && <div style={{ fontSize: 11 }}>PAN: {s.pan}</div>}
+=======
+>>>>>>> origin/main
               </td>
               <td colSpan={4} style={{ border: b, padding: 6, verticalAlign: 'top', fontSize: 11 }}>
                 <div>Invoice No.</div>
                 <div style={{ fontWeight: 700, fontSize: 13 }}>{data.number}</div>
                 <div style={{ marginTop: 6 }}>Invoice Date:</div>
                 <div style={{ fontWeight: 700, fontSize: 13 }}>{fmtDate(data.invoiceDate)}</div>
+<<<<<<< HEAD
                 {data.dueDate && <><div style={{ marginTop: 4 }}>Due Date:</div><div style={{ fontWeight: 700 }}>{fmtDate(data.dueDate)}</div></>}
+=======
+>>>>>>> origin/main
               </td>
             </tr>
             <tr>
@@ -142,9 +158,12 @@ export default function InvoicePreview({ data, copy = 'ORIGINAL' }: { data: Prev
                 <div style={{ fontSize: 14, fontWeight: 700, wordBreak: 'break-word' }}>{data.buyerName}</div>
                 <div style={{ fontSize: 11, whiteSpace: 'pre-line', wordBreak: 'break-word' }}>{data.buyerAddress}</div>
                 {data.buyerGstin && <div style={{ fontSize: 11, fontWeight: 700 }}>GSTIN: {data.buyerGstin}</div>}
+<<<<<<< HEAD
                 {data.buyerPhone && <div style={{ fontSize: 11 }}>Phone: {data.buyerPhone}</div>}
                 {data.buyerEmail && <div style={{ fontSize: 11 }}>Email: {data.buyerEmail}</div>}
                 {data.shippingAddress && <div style={{ fontSize: 11, marginTop: 4, whiteSpace: 'pre-line' }}>Ship to: {data.shippingAddress}</div>}
+=======
+>>>>>>> origin/main
               </td>
               <td colSpan={4} style={{ border: b, padding: 6, verticalAlign: 'top', fontSize: 11 }}>
                 {data.docType === 'TAX_INVOICE' ? (<><div>P.O. No:</div><div style={{ fontWeight: 700, fontSize: 14 }}>{data.poNumber}</div></>)
@@ -182,8 +201,11 @@ export default function InvoicePreview({ data, copy = 'ORIGINAL' }: { data: Prev
                 <div>Bank Name: {s.bankName}</div>
                 <div>A/C: {s.bankAccount}</div>
                 <div>Branch: {s.bankBranch} &nbsp;&nbsp; IFSC: {s.ifsc}</div>
+<<<<<<< HEAD
                 {s.upiId && <div>UPI ID: {s.upiId}</div>}
                 {s.defaultPaymentTerms && <div style={{ marginTop: 4 }}>Payment terms: {s.defaultPaymentTerms}</div>}
+=======
+>>>>>>> origin/main
                 <div style={{ marginTop: 10, whiteSpace: 'pre-line' }}>Declaration:{'\n'}{s.declaration}</div>
               </td>
               <td colSpan={4} style={{ border: b, padding: 0, verticalAlign: 'top', fontSize: 11 }}>
@@ -195,14 +217,21 @@ export default function InvoicePreview({ data, copy = 'ORIGINAL' }: { data: Prev
                   </div>
                 ))}
                 <div style={{ textAlign: 'center', padding: '6px 4px', whiteSpace: 'pre-line' }}>
+<<<<<<< HEAD
                   For, {s.signatureText || s.companyName}{'\n\n\n\n'}
                   {s.authorizedSignatory ? `${s.authorizedSignatory}\n` : ''}{s.signatoryDesignation ? `${s.signatoryDesignation}\n` : ''}Signature
+=======
+                  For, {s.signatureText}{'\n\n\n\n'}Signature
+>>>>>>> origin/main
                 </div>
               </td>
             </tr>
           </tbody>
         </table>
+<<<<<<< HEAD
         {data.paymentTerms && <p style={{ fontSize: 10, marginTop: 6 }}>Payment terms: {data.paymentTerms}</p>}
+=======
+>>>>>>> origin/main
         {s.footerNote && <p style={{ fontSize: 10, fontStyle: 'italic', marginTop: 6 }}>{s.footerNote}</p>}
         {data.status === 'CANCELLED' && <p style={{ fontSize: 11, fontWeight: 700, marginTop: 6 }}>CANCELLED: {data.cancelReason}</p>}
       </div>

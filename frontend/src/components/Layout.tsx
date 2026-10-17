@@ -1,11 +1,17 @@
 import { useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
+<<<<<<< HEAD
 import { useCompany } from '../lib/company'
 
 export default function Layout() {
   const { user, logout, can } = useAuth()
   const { companies, companyId, selectCompany, error: companyError } = useCompany()
+=======
+
+export default function Layout() {
+  const { user, logout, can } = useAuth()
+>>>>>>> origin/main
   const nav = useNavigate()
   const [open, setOpen] = useState(false)
 
@@ -29,6 +35,7 @@ export default function Layout() {
       </header>
       <aside className={`no-print ${open ? 'block' : 'hidden'} bg-navy-900 p-3 text-white lg:sticky lg:top-0 lg:block lg:h-screen lg:w-60 lg:shrink-0`}>
         <div className="mb-4 hidden px-3 pt-2 text-lg font-bold lg:block">Bill Manager</div>
+<<<<<<< HEAD
         <label className="mb-4 block px-3 text-xs font-semibold uppercase tracking-wide text-slate-300">
           Select Business / Company
           <select className="input mt-1 text-slate-900" value={companyId} onChange={e => selectCompany(Number(e.target.value))}>
@@ -36,6 +43,8 @@ export default function Layout() {
           </select>
         </label>
         {companyError && <div className="px-3 pb-3 text-sm text-red-200">{companyError}</div>}
+=======
+>>>>>>> origin/main
         <nav className="space-y-1" onClick={() => setOpen(false)}>
           {links.filter(l => l[2]).map(([to, label]) => <NavLink key={to} to={to} end={to === '/' || to === '/bills'} className={cls}>{label}</NavLink>)}
         </nav>

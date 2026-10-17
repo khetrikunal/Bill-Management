@@ -5,7 +5,10 @@ import com.billing.domain.Role;
 import com.billing.dto.Dtos.*;
 import com.billing.repo.UserRepository;
 import com.billing.service.ApiException;
+<<<<<<< HEAD
 import com.billing.service.CompanyAccessService;
+=======
+>>>>>>> origin/main
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -20,19 +23,29 @@ import java.util.List;
 public class UserController {
     private final UserRepository users;
     private final PasswordEncoder encoder;
+<<<<<<< HEAD
     private final CompanyAccessService companyAccess;
 
     public UserController(UserRepository users, PasswordEncoder encoder, CompanyAccessService companyAccess) {
         this.users = users;
         this.encoder = encoder;
         this.companyAccess = companyAccess;
+=======
+
+    public UserController(UserRepository users, PasswordEncoder encoder) {
+        this.users = users;
+        this.encoder = encoder;
+>>>>>>> origin/main
     }
 
     @GetMapping
     public List<UserDto> list() { return users.findAll().stream().map(UserDto::of).toList(); }
 
     @PostMapping
+<<<<<<< HEAD
     @Transactional
+=======
+>>>>>>> origin/main
     public UserDto create(@Valid @RequestBody UserCreate r) {
         if (users.existsByUsernameIgnoreCase(r.username())) throw ApiException.conflict("Username already exists");
         AppUser u = new AppUser();
@@ -40,6 +53,7 @@ public class UserController {
         u.fullName = r.fullName().trim();
         u.role = r.role();
         u.passwordHash = encoder.encode(r.password());
+<<<<<<< HEAD
         u = users.save(u);
         companyAccess.grantAll(u.id);
         return UserDto.of(u);
@@ -57,6 +71,9 @@ public class UserController {
         if (!users.existsById(id)) throw ApiException.notFound("User not found");
         companyAccess.replace(id, request.companyIds());
         return companyAccess.companyIds(id);
+=======
+        return UserDto.of(users.save(u));
+>>>>>>> origin/main
     }
 
     @PutMapping("/{id}")

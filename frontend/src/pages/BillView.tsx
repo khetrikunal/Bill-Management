@@ -5,16 +5,24 @@ import { Alert, PageHeader, Spinner, StatusBadge } from '../components/ui'
 import { api, saveBlob, shareOrSave } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import type { Bill } from '../lib/types'
+<<<<<<< HEAD
 import { useCompany } from '../lib/company'
+=======
+>>>>>>> origin/main
 
 interface Audit { action: string; username: string; detail: string; createdAt: string }
 
 export function toPreview(b: Bill): PreviewData {
   return {
+<<<<<<< HEAD
     docType: b.docType, number: b.invoiceNumber ?? 'DRAFT', invoiceDate: b.invoiceDate, dueDate: b.dueDate,
     paymentTerms: b.paymentTerms, poNumber: b.poNumber,
     transactionRef: b.transactionRef, buyerName: b.buyerName, buyerAddress: b.buyerAddress, buyerGstin: b.buyerGstin,
     buyerPhone: b.buyerPhone, buyerEmail: b.buyerEmail, shippingAddress: b.shippingAddress,
+=======
+    docType: b.docType, number: b.invoiceNumber ?? 'DRAFT', invoiceDate: b.invoiceDate, poNumber: b.poNumber,
+    transactionRef: b.transactionRef, buyerName: b.buyerName, buyerAddress: b.buyerAddress, buyerGstin: b.buyerGstin,
+>>>>>>> origin/main
     currency: b.currency, seller: b.seller,
     items: b.items.map(i => ({ ...i, taxable: i.taxable ?? 0, cgst: i.cgst ?? 0, sgst: i.sgst ?? 0, total: i.total ?? 0 })),
     totals: { taxable: b.totalTaxable, cgst: b.totalCgst, sgst: b.totalSgst, tax: b.totalTax, grand: b.grandTotal },
@@ -27,13 +35,17 @@ export default function BillView() {
   const [sp] = useSearchParams()
   const nav = useNavigate()
   const { can } = useAuth()
+<<<<<<< HEAD
   const { selectCompany } = useCompany()
+=======
+>>>>>>> origin/main
   const [bill, setBill] = useState<Bill | null>(null)
   const [history, setHistory] = useState<Audit[]>([])
   const [err, setErr] = useState('')
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
   const [copy, setCopy] = useState('ORIGINAL')
+<<<<<<< HEAD
   const [paymentAmount, setPaymentAmount] = useState('')
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().slice(0, 10))
   const [paymentMethod, setPaymentMethod] = useState('BANK_TRANSFER')
@@ -49,6 +61,15 @@ export default function BillView() {
       setBill(b); setHistory(h)
     } catch (e) { setErr((e as Error).message) }
   }, [id, sp, selectCompany])
+=======
+
+  const load = useCallback(async () => {
+    try {
+      const [b, h] = await Promise.all([api.get<Bill>(`/bills/${id}`), api.get<Audit[]>(`/bills/${id}/history`)])
+      setBill(b); setHistory(h)
+    } catch (e) { setErr((e as Error).message) }
+  }, [id])
+>>>>>>> origin/main
   useEffect(() => { load() }, [load])
 
   // /bills/:id?print=1 opens the print dialog once the sheet is on screen
@@ -60,7 +81,11 @@ export default function BillView() {
   }
 
   const pdf = async (share: boolean) => run(async () => {
+<<<<<<< HEAD
     const { blob, filename } = await api.blob(`/bills/${id}/pdf?copy=${copy}&companyId=${bill?.companyId ?? ''}`)
+=======
+    const { blob, filename } = await api.blob(`/bills/${id}/pdf?copy=${copy}`)
+>>>>>>> origin/main
     if (share) await shareOrSave(blob, filename); else saveBlob(blob, filename)
   })
 
@@ -76,8 +101,12 @@ export default function BillView() {
       <div className="no-print mb-3 space-y-2">
         {err && <Alert>{err}</Alert>}
         {msg && <Alert kind="success">{msg}</Alert>}
+<<<<<<< HEAD
         <div className="text-sm text-slate-600">{bill.companyDisplayName} · {bill.docTypeLabel} · {bill.buyerName}{bill.transactionRef ? ` · Ref ${bill.transactionRef}` : ''}{bill.duplicatedFrom ? ` · copied from #${bill.duplicatedFrom}` : ''}</div>
         <div className="text-sm">Payment: <b>{bill.paymentStatus}</b> · Received {bill.currency} {bill.amountPaid.toFixed(2)} · Outstanding {bill.currency} {bill.outstandingBalance.toFixed(2)}</div>
+=======
+        <div className="text-sm text-slate-600">{bill.docTypeLabel} · {bill.buyerName}{bill.transactionRef ? ` · Ref ${bill.transactionRef}` : ''}{bill.duplicatedFrom ? ` · copied from #${bill.duplicatedFrom}` : ''}</div>
+>>>>>>> origin/main
         <div className="flex flex-wrap items-center gap-2">
           <select className="input !w-auto !py-2" value={copy} onChange={e => setCopy(e.target.value)} aria-label="Copy type">
             <option value="ORIGINAL">Original for Recipient</option><option value="DUPLICATE">Duplicate for Transporter</option><option value="TRIPLICATE">Triplicate for Supplier</option>
@@ -85,7 +114,11 @@ export default function BillView() {
           <button className="btn btn-primary" disabled={busy} onClick={() => pdf(false)}>Download PDF</button>
           <button className="btn" disabled={busy} onClick={() => pdf(true)}>Share / Save to phone</button>
           <button className="btn" onClick={() => window.print()}>Print</button>
+<<<<<<< HEAD
           {canWrite && bill.status === 'DRAFT' && <Link className="btn" to={`/bills/${bill.id}/edit?companyId=${bill.companyId}`}>Edit</Link>}
+=======
+          {canWrite && bill.status === 'DRAFT' && <Link className="btn" to={`/bills/${bill.id}/edit`}>Edit</Link>}
+>>>>>>> origin/main
           {canWrite && bill.status === 'DRAFT' && (
             <button className="btn btn-primary" disabled={busy} onClick={() => {
               if (!confirm('Finalize this bill? It will get its permanent invoice number and can no longer be edited.')) return
@@ -111,6 +144,7 @@ export default function BillView() {
 
       <InvoicePreview data={toPreview(bill)} copy={copy} />
 
+<<<<<<< HEAD
       {canWrite && bill.status === 'FINAL' && bill.outstandingBalance > 0 && (
         <section className="no-print card mt-6">
           <h2 className="mb-3 text-lg font-semibold">Record payment</h2>
@@ -146,6 +180,8 @@ export default function BillView() {
         </section>
       )}
 
+=======
+>>>>>>> origin/main
       <section className="no-print card mt-6">
         <h2 className="mb-2 text-lg font-semibold">History</h2>
         <ul className="space-y-1 text-sm">

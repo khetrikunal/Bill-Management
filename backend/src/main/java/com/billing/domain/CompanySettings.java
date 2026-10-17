@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 public class CompanySettings {
     @Id public Long id = 1L;
     public String companyName;
+<<<<<<< HEAD
     public String displayName;
     public String address;
     public String billingAddress;
@@ -15,16 +16,27 @@ public class CompanySettings {
     public String email;
     public String gstin;
     public String pan;
+=======
+    public String address;
+    public String phone;
+    public String email;
+    public String gstin;
+>>>>>>> origin/main
     public String bankName;
     public String bankAccount;
     public String bankBranch;
     public String ifsc;
+<<<<<<< HEAD
     public String upiId;
     public String defaultPaymentTerms;
     public String declaration;
     public String signatureText;
     public String authorizedSignatory;
     public String signatoryDesignation;
+=======
+    public String declaration;
+    public String signatureText;
+>>>>>>> origin/main
     public String footerNote;
     public String logo;
     public String defaultCurrency;

@@ -5,6 +5,7 @@ import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { money } from '../lib/calc'
 import type { BillSummary } from '../lib/types'
+<<<<<<< HEAD
 import { useCompany } from '../lib/company'
 
 interface Dash {
@@ -13,10 +14,17 @@ interface Dash {
   companies: Array<{ companyId: number; companyDisplayName: string; invoiceCount: number; totals: Array<{
     currency: string; billed: number; received: number; outstanding: number
   }> }>
+=======
+
+interface Dash {
+  total: number; thisMonth: number; drafts: number; finalized: number; cancelled: number
+  recent: BillSummary[]; finalizedThisMonth: Array<{ currency: string; total: number }>
+>>>>>>> origin/main
 }
 
 export default function Dashboard() {
   const { can } = useAuth()
+<<<<<<< HEAD
   const { companies, companyId } = useCompany()
   const [companyFilter, setCompanyFilter] = useState(String(companyId))
   const [d, setD] = useState<Dash | null>(null)
@@ -30,6 +38,15 @@ export default function Dashboard() {
   if (!d) return <Spinner />
 
   const stats: Array<[string, number]> = [['Total bills', d.total], ['Created this month', d.thisMonth], ['Drafts', d.drafts], ['Finalized', d.finalized], ['Overdue', d.overdue], ['Cancelled', d.cancelled]]
+=======
+  const [d, setD] = useState<Dash | null>(null)
+  const [err, setErr] = useState('')
+  useEffect(() => { api.get<Dash>('/dashboard').then(setD).catch(e => setErr(e.message)) }, [])
+  if (err) return <Alert>{err}</Alert>
+  if (!d) return <Spinner />
+
+  const stats: Array<[string, number]> = [['Total bills', d.total], ['Created this month', d.thisMonth], ['Drafts', d.drafts], ['Finalized', d.finalized], ['Cancelled', d.cancelled]]
+>>>>>>> origin/main
   return (
     <div>
       <PageHeader title="Dashboard">
@@ -38,6 +55,7 @@ export default function Dashboard() {
           <Link className="btn" to="/bills/new?type=MULTI_PO_INVOICE">+ Tax Invoice (multiple P.O.s)</Link>
         </>)}
       </PageHeader>
+<<<<<<< HEAD
       <div className="card mb-3 max-w-md">
         <label className="text-sm font-semibold">Select Business / Company</label>
         <select className="input mt-1" value={companyFilter} onChange={e => setCompanyFilter(e.target.value)}>
@@ -45,6 +63,8 @@ export default function Dashboard() {
           {companies.map(company => <option key={company.id} value={company.id}>{company.displayName}</option>)}
         </select>
       </div>
+=======
+>>>>>>> origin/main
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
         {stats.map(([l, v]) => <div key={l} className="card"><div className="text-sm text-slate-500">{l}</div><div className="text-3xl font-bold">{v}</div></div>)}
       </div>
@@ -54,6 +74,7 @@ export default function Dashboard() {
           <div className="mt-1 flex flex-wrap gap-x-6 text-xl font-bold">{d.finalizedThisMonth.map(t => <span key={t.currency}>{t.currency} {money(t.total, t.currency)}</span>)}</div>
         </div>
       )}
+<<<<<<< HEAD
       <section className="mt-5">
         <h2 className="mb-2 text-lg font-semibold">Business totals</h2>
         <div className="grid gap-3 lg:grid-cols-2">
@@ -75,12 +96,19 @@ export default function Dashboard() {
           ))}
         </div>
       </section>
+=======
+>>>>>>> origin/main
       <h2 className="mb-2 mt-6 text-lg font-semibold">Recent bills</h2>
       <div className="card divide-y p-0 sm:p-0">
         {d.recent.length === 0 && <p className="p-4 text-slate-500">No bills yet.</p>}
         {d.recent.map(b => (
+<<<<<<< HEAD
           <Link key={b.id} to={`/bills/${b.id}?companyId=${b.companyId}`} className="flex items-center justify-between gap-3 p-4 hover:bg-slate-50">
             <div className="min-w-0"><div className="font-semibold">{b.displayNumber}</div><div className="truncate text-sm text-slate-600">{b.companyDisplayName} · {b.buyerName}</div></div>
+=======
+          <Link key={b.id} to={`/bills/${b.id}`} className="flex items-center justify-between gap-3 p-4 hover:bg-slate-50">
+            <div className="min-w-0"><div className="font-semibold">{b.displayNumber}</div><div className="truncate text-sm text-slate-600">{b.buyerName}</div></div>
+>>>>>>> origin/main
             <div className="text-right"><div className="font-semibold">{b.currency} {money(b.grandTotal, b.currency)}</div><StatusBadge status={b.status} /></div>
           </Link>
         ))}
