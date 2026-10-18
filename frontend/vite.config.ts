@@ -7,6 +7,5 @@ export default defineConfig({
     port: 5173,
     // Dev: forward /api to the Spring Boot backend so no CORS setup is needed.
     proxy: { '/api': { target: process.env.VITE_API_TARGET || 'http://localhost:8080', changeOrigin: true } },
-    proxy: { '/api': { target: process.env.VITE_API_TARGET || 'https://billing-backend-7qa0.onrender.com', changeOrigin: true } },
   },
 })

@@ -1,0 +1,137 @@
+{
+  "planHash": "a7808ab1880c79c6f670f5f288e4e08df047bc89e29431e052cc8507d9211400",
+  "phase": "standalone",
+  "recordedAtUtc": "2026-10-18T10:48:02.3268964Z",
+  "retryCount": 1,
+  "resetBaseline": false,
+  "complete": true,
+  "result": {
+    "setupSucceeded": true,
+    "setupDurationMs": 44707,
+    "setupFailureOutput": null,
+    "assertions": [
+      {
+        "name": "tsc-no-emit",
+        "kind": "process",
+        "verificationMethod": "exit-code",
+        "passed": true,
+        "timedOut": false,
+        "skipped": false,
+        "skippedReason": null,
+        "exitCode": 0,
+        "outputSample": "",
+        "durationMs": 8397
+      },
+      {
+        "name": "production-build",
+        "kind": "process",
+        "verificationMethod": "exit-code",
+        "passed": true,
+        "timedOut": false,
+        "skipped": false,
+        "skippedReason": null,
+        "exitCode": 0,
+        "outputSample": "\r\n\u003E billing-frontend@1.0.0 build\r\n\u003E tsc --noEmit \u0026\u0026 vite build\r\n\r\n\u001B[36mvite v5.4.8 \u001B[32mbuilding for production...\u001B[36m\u001B[39m\r\ntransforming...\r\n\u001B[32m\u2713\u001B[39m 50 modules transformed.\r\nrendering chunks...\r\ncomputing gzip size...\r\n\u001B[2mdist/\u001B[22m\u001B[32mindex.html                 \u001B[39m\u001B[1m\u001B[2m  0.43 kB\u001B[22m\u001B[1m\u001B[22m\u001B[2m \u2502 gzip:  0.29 kB\u001B[22m\r\n\u001B[2mdist/\u001B[22m\u001B[35massets/index-vk9b8hEx.css  \u001B[39m\u001B[1m\u001B[2m 18.77 kB\u001B[22m\u001B[1m\u001B[22m\u001B[2m \u2502 gzip:  4.05 kB\u001B[22m\r\n\u001B[2mdist/\u001B[22m\u001B[36massets/index-mGPH99AO.js   \u001B[39m\u001B[1m\u001B[2m235.51 kB\u001B[22m\u001B[1m\u001B[22m\u001B[2m \u2502 gzip: 72.10 kB\u001B[22m\r\n\u001B[32m\u2713 built in 2.37s\u001B[39m\r\n",
+        "durationMs": 7846
+      },
+      {
+        "name": "dev-server-serves-home",
+        "kind": "http-probe",
+        "verificationMethod": "http-status",
+        "passed": true,
+        "timedOut": false,
+        "skipped": false,
+        "skippedReason": null,
+        "exitCode": null,
+        "outputSample": "HTTP 200\n\u003C!doctype html\u003E\n\u003Chtml lang=\u0022en\u0022\u003E\n  \u003Chead\u003E\n    \u003Cscript type=\u0022module\u0022\u003E\nimport RefreshRuntime from \u0022/@react-refresh\u0022\nRefreshRuntime.injectIntoGlobalHook(window)\nwindow.$RefreshReg$ = () =\u003E {}\nwindow.$RefreshSig$ = () =\u003E (type) =\u003E type\nwindow.__vite_plugin_react_preamble_installed__ = true\n\u003C/script\u003E\n\n    \u003Cscript type=\u0022module\u0022 src=\u0022/@vite/client\u0022\u003E\u003C/script\u003E\n\n    \u003Cmeta charset=\u0022UTF-8\u0022 /\u003E\n    \u003Cmeta name=\u0022viewport\u0022 content=\u0022width=device-width, initial-scale=1.0\u0022 /\u003E\n    \u003Ctitle\u003EBill Manager\u003C/title\u003E\n  \u003C/head\u003E\n  \u003Cbody class=\u0022bg-slate-50 text-navy-900\u0022\u003E\n    \u003Cdiv id=\u0022root\u0022\u003E\u003C/div\u003E\n    \u003Cscript type=\u0022module\u0022 src=\u0022/src/main.tsx\u0022\u003E\u003C/script\u003E\n  \u003C/body\u003E\n\u003C/html\u003E\n\n--- server output ---\n\r\n\u003E billing-frontend@1.0.0 dev\r\n\u003E vite --host 127.0.0.1 --port 5174\r\n\r\n\r\n  \u001B[32m\u001B[1mVITE\u001B[22m v5.4.8\u001B[39m  \u001B[2mready in \u001B[0m\u001B[1m722\u001B[22m\u001B[2m\u001B[0m ms\u001B[22m\r\n\r\n  \u001B[32m\u279C\u001B[39m  \u001B[1mLocal\u001B[22m:   \u001B[36mhttp://127.0.0.1:\u001B[1m5174\u001B[22m/\u001B[39m\r\n",
+        "durationMs": 1654
+      },
+      {
+        "name": "tests-pass",
+        "kind": "process",
+        "verificationMethod": "test-results",
+        "passed": true,
+        "timedOut": false,
+        "skipped": false,
+        "skippedReason": null,
+        "exitCode": 0,
+        "outputSample": "\r\n\u003E billing-frontend@1.0.0 test\r\n\u003E vitest run\r\n\r\n\r\n\u001B[7m\u001B[1m\u001B[36m RUN \u001B[39m\u001B[22m\u001B[27m \u001B[36mv2.1.2\u001B[39m \u001B[90mD:/Prashant kshetri/billing-system/frontend\u001B[39m\r\n\r\n \u001B[32m\u2713\u001B[39m src/lib/calc.test.ts \u001B[2m (\u001B[22m\u001B[2m4 tests\u001B[22m\u001B[2m)\u001B[22m\u001B[90m 11\u001B[2mms\u001B[22m\u001B[39m\r\n\r\n\u001B[2m Test Files \u001B[22m \u001B[1m\u001B[32m1 passed\u001B[39m\u001B[22m\u001B[90m (1)\u001B[39m\r\n\u001B[2m      Tests \u001B[22m \u001B[1m\u001B[32m4 passed\u001B[39m\u001B[22m\u001B[90m (4)\u001B[39m\r\n\u001B[2m   Start at \u001B[22m 16:17:59\r\n\u001B[2m   Duration \u001B[22m 2.35s\u001B[2m (transform 107ms, setup 0ms, collect 108ms, tests 11ms, environment 0ms, prepare 309ms)\u001B[22m\r\n\r\n",
+        "durationMs": 4693,
+        "testResults": {
+          "testFramework": "vitest",
+          "runnerDetectedFrom": "package_json",
+          "testsTotal": 4,
+          "testsPassed": 4,
+          "testsFailed": 0,
+          "testsSkipped": 0,
+          "parseFailed": false
+        }
+      }
+    ],
+    "executions": [
+      {
+        "source": "setup[0]",
+        "resolvedExecutable": "C:\\Program Files\\nodejs\\npm.CMD",
+        "args": [
+          "ci"
+        ],
+        "cwd": "D:\\Prashant kshetri\\billing-system\\frontend",
+        "env": {},
+        "prependPath": [],
+        "platform": "win32"
+      },
+      {
+        "source": "tsc-no-emit",
+        "resolvedExecutable": "C:\\Program Files\\nodejs\\npx.CMD",
+        "args": [
+          "tsc",
+          "--noEmit"
+        ],
+        "cwd": "D:\\Prashant kshetri\\billing-system\\frontend",
+        "env": {},
+        "prependPath": [],
+        "platform": "win32"
+      },
+      {
+        "source": "production-build",
+        "resolvedExecutable": "C:\\Program Files\\nodejs\\npm.CMD",
+        "args": [
+          "run",
+          "build"
+        ],
+        "cwd": "D:\\Prashant kshetri\\billing-system\\frontend",
+        "env": {},
+        "prependPath": [],
+        "platform": "win32"
+      },
+      {
+        "source": "dev-server-serves-home",
+        "resolvedExecutable": "C:\\Program Files\\nodejs\\npm.CMD",
+        "args": [
+          "run",
+          "dev",
+          "--",
+          "--host",
+          "127.0.0.1",
+          "--port",
+          "5174"
+        ],
+        "cwd": "D:\\Prashant kshetri\\billing-system\\frontend",
+        "env": {},
+        "prependPath": [],
+        "platform": "win32"
+      },
+      {
+        "source": "tests-pass",
+        "resolvedExecutable": "C:\\Program Files\\nodejs\\npm.CMD",
+        "args": [
+          "test"
+        ],
+        "cwd": "D:\\Prashant kshetri\\billing-system\\frontend",
+        "env": {},
+        "prependPath": [],
+        "platform": "win32"
+      }
+    ]
+  }
+}

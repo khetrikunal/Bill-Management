@@ -2,27 +2,18 @@ import { useEffect, useState, type ChangeEvent } from 'react'
 import { Alert, Field, PageHeader, Spinner } from '../components/ui'
 import { api, ApiError } from '../lib/api'
 import type { Settings } from '../lib/types'
-<<<<<<< HEAD
 import { useCompany } from '../lib/company'
 
 export default function SettingsPage() {
   const { companyId } = useCompany()
-=======
-
-export default function SettingsPage() {
->>>>>>> origin/main
   const [s, setS] = useState<Settings | null>(null)
   const [err, setErr] = useState('')
   const [ok, setOk] = useState('')
   const [fe, setFe] = useState<Record<string, string>>({})
-<<<<<<< HEAD
   useEffect(() => {
     setS(null); setErr('')
     api.get<Settings>('/settings').then(setS).catch(e => setErr(e.message))
   }, [companyId])
-=======
-  useEffect(() => { api.get<Settings>('/settings').then(setS).catch(e => setErr(e.message)) }, [])
->>>>>>> origin/main
   if (!s) return err ? <Alert>{err}</Alert> : <Spinner />
 
   const set = <K extends keyof Settings>(k: K, v: Settings[K]) => setS({ ...s, [k]: v })
@@ -51,17 +42,11 @@ export default function SettingsPage() {
       {err && <Alert>{err}</Alert>}{ok && <Alert kind="success">{ok}</Alert>}
       <section className="card grid gap-3 sm:grid-cols-2">
         <h2 className="text-lg font-semibold sm:col-span-2">Company</h2>
-<<<<<<< HEAD
         {txt('companyName', 'Legal business name')}{txt('displayName', 'Display name')}
         {txt('gstin', 'GSTIN')}{txt('pan', 'PAN')}
         <Field label="Address" className="sm:col-span-2"><textarea className="input" rows={3} value={s.address} onChange={e => set('address', e.target.value)} /></Field>
         <Field label="Billing address" className="sm:col-span-2"><textarea className="input" rows={3} value={s.billingAddress} onChange={e => set('billingAddress', e.target.value)} /></Field>
         {txt('phone', 'Contact number')}{txt('email', 'Email')}
-=======
-        {txt('companyName', 'Company name')}{txt('gstin', 'GSTIN')}
-        <Field label="Address" className="sm:col-span-2"><textarea className="input" rows={3} value={s.address} onChange={e => set('address', e.target.value)} /></Field>
-        {txt('phone', 'Mobile / phone')}{txt('email', 'Email')}
->>>>>>> origin/main
         <Field label="Logo (PNG/JPG, under 300 KB)" className="sm:col-span-2">
           <input type="file" accept="image/png,image/jpeg" onChange={logo} />
           {s.logo && <div className="mt-2 flex items-center gap-3"><img src={s.logo} alt="logo" className="h-12" /><button className="btn" onClick={() => set('logo', null)}>Remove</button></div>}
@@ -70,7 +55,6 @@ export default function SettingsPage() {
       <section className="card grid gap-3 sm:grid-cols-2">
         <h2 className="text-lg font-semibold sm:col-span-2">Bank details</h2>
         {txt('bankName', 'Bank name')}{txt('bankAccount', 'Account number')}{txt('bankBranch', 'Branch')}{txt('ifsc', 'IFSC')}
-<<<<<<< HEAD
         {txt('upiId', 'UPI ID')}{txt('defaultPaymentTerms', 'Default payment terms')}
       </section>
       <section className="card grid gap-3 sm:grid-cols-2">
@@ -78,13 +62,6 @@ export default function SettingsPage() {
         <Field label="Declaration" className="sm:col-span-2"><textarea className="input" rows={3} value={s.declaration} onChange={e => set('declaration', e.target.value)} /></Field>
         {txt('signatureText', 'Signature line ("For, …")', 'sm:col-span-2')}
         {txt('authorizedSignatory', 'Authorized signatory')}{txt('signatoryDesignation', 'Designation')}
-=======
-      </section>
-      <section className="card grid gap-3 sm:grid-cols-2">
-        <h2 className="text-lg font-semibold sm:col-span-2">Printed text</h2>
-        <Field label="Declaration" className="sm:col-span-2"><textarea className="input" rows={3} value={s.declaration} onChange={e => set('declaration', e.target.value)} /></Field>
-        {txt('signatureText', 'Signature line ("For, …")', 'sm:col-span-2')}
->>>>>>> origin/main
         <Field label="Footer note (optional)" className="sm:col-span-2"><textarea className="input" rows={2} value={s.footerNote} onChange={e => set('footerNote', e.target.value)} /></Field>
       </section>
       <section className="card grid gap-3 sm:grid-cols-2">
