@@ -19,7 +19,9 @@ Two document types (from your two sheets), automatic GST calculation, live previ
 3. Backend (new terminal):
    ```
    cd backend
-   $env:DB_PASSWORD="your-db-password"
+   $env:SPRING_PROFILES_ACTIVE="local"
+   $env:SPRING_DATASOURCE_USERNAME="billing"
+   $env:SPRING_DATASOURCE_PASSWORD="your-db-password"
    $env:JWT_SECRET="paste-at-least-32-random-characters-here"
    $env:ADMIN_PASSWORD="choose-a-strong-password"
    mvn spring-boot:run
@@ -49,7 +51,7 @@ Use any VPS (or a PaaS that runs Docker). Put the stack behind HTTPS (Caddy, Ngi
 * **Corrections:** finalized bills are locked. Use *Duplicate* to make a corrected draft; an Admin can *Cancel* the wrong one (reason is recorded).
 
 ## Configuration
-Backend environment variables: `DB_URL`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET` (≥32 chars, required), `JWT_EXPIRY_MINUTES`, `ADMIN_USERNAME`, `ADMIN_PASSWORD` (used only when no users exist), `CORS_ORIGINS`, `PORT`. See `.env.example`. Company details, prefix, digits, financial-year option, GST defaults, page size, logo, bank and declaration are edited in **Company Settings**.
+Backend environment variables: `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`, `JWT_SECRET` (≥32 chars, required), `JWT_EXPIRY_MINUTES`, `ADMIN_USERNAME`, `ADMIN_PASSWORD` (used only when no users exist), `CORS_ORIGINS`, `PORT`. Activate `SPRING_PROFILES_ACTIVE=local` for a local backend run to use the local-only database defaults. Docker and the Render Blueprint build the JDBC URL from `DB_HOST`, `DB_PORT`, and `DB_NAME`; credentials are supplied as `SPRING_DATASOURCE_USERNAME` and `SPRING_DATASOURCE_PASSWORD`. Company details, prefix, digits, financial-year option, GST defaults, page size, logo, bank and declaration are edited in **Company Settings**.
 
 ## Layout
 `backend/` Spring Boot (`domain`, `repo`, `service`, `web`, `security`, Flyway SQL in `resources/db/migration`) · `frontend/` React app · `docs/` analysis, API, test plan.

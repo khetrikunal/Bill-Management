@@ -14,9 +14,11 @@ services:
     build: ./backend
     depends_on: { db: { condition: service_healthy } }
     environment:
-      DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
-      DB_USER: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRY_MINUTES: ${JWT_EXPIRY_MINUTES}
       ADMIN_USERNAME: ${ADMIN_USERNAME}

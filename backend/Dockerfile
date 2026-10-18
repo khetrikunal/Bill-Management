@@ -9,6 +9,7 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 RUN useradd -r app
 COPY --from=build /app/target/billing-backend-1.0.0.jar app.jar
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
 USER app
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","app.jar"]
+ENTRYPOINT ["sh","/app/docker-entrypoint.sh"]

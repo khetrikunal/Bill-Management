@@ -21,9 +21,9 @@ services:
         fromDatabase: { name: billing-db, property: port }
       - key: DB_NAME
         fromDatabase: { name: billing-db, property: database }
-      - key: DB_USER
+      - key: SPRING_DATASOURCE_USERNAME
         fromDatabase: { name: billing-db, property: user }
-      - key: DB_PASSWORD
+      - key: SPRING_DATASOURCE_PASSWORD
         fromDatabase: { name: billing-db, property: password }
       - key: JWT_SECRET
         generateValue: true
