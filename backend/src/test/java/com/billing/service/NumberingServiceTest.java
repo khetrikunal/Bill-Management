@@ -1,7 +1,6 @@
 package com.billing.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-<<<<<<< HEAD
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -13,10 +12,6 @@ import com.billing.domain.NumberSequence;
 import com.billing.repo.NumberSequenceRepository;
 import java.time.LocalDate;
 import java.util.Optional;
-=======
-
-import java.time.LocalDate;
->>>>>>> origin/main
 import org.junit.jupiter.api.Test;
 
 class NumberingServiceTest {
@@ -31,8 +26,6 @@ class NumberingServiceTest {
         assertEquals("SSE-0042", NumberingService.format("SSE", "2026-27", 42, 4, false));
         assertEquals("EXP-2026-27-12345", NumberingService.format("EXP", "2026-27", 12345, 4, true));
     }
-<<<<<<< HEAD
-
     @Test void sequenceKeysAreIndependentForEachCompany() {
         NumberSequenceRepository repo = mock(NumberSequenceRepository.class);
         when(repo.lockByKey(anyString())).thenAnswer(invocation -> Optional.of(new NumberSequence()));
@@ -55,6 +48,4 @@ class NumberingServiceTest {
         settings.includeFinancialYear = true;
         return settings;
     }
-=======
->>>>>>> origin/main
 }
